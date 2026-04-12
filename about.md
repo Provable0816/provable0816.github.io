@@ -19,9 +19,8 @@ description: "了解更多关于我的信息"
      将您的头像图片放在 assets/images/ 目录下
      然后取消下面这行的注释并修改文件名
 -->
-<!-- 
+
 ![我的头像](/assets/images/profile.jpg)
--->
 
 ## 个人简介
 

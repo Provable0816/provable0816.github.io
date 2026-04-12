@@ -9,7 +9,7 @@
 # ------------------------------------------------------------
 title: "我的个人网站"                    # 网站标题，显示在浏览器标签页和页面标题
 description: "这是我的 GitHub Pages 个人网站"  # 网站描述，用于 SEO 和社交媒体分享
-author: "你的名字"                       # 作者名称
+author: "Provable"                       # 作者名称
 email: "your-email@example.com"         # 联系邮箱
 
 # ------------------------------------------------------------
@@ -54,8 +54,8 @@ navigation:
 social:
   github: "your-username"
   twitter: "your-username"
-  # weibo: "your-username"
-  # zhihu: "your-username"
+  weibo: "your-username"
+  zhihu: "your-username"
 
 # ------------------------------------------------------------
 # 高级设置（通常不需要修改）
