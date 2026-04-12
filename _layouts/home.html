@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     首页布局模板 (_layouts/home.html)
+     这是网站的首页布局，index.md 会使用这个模板
+============================================================= -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 页面标题 -->
+    <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+    
+    <!-- 页面描述（SEO） -->
+    <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+    
+    <!-- 作者信息 -->
+    <meta name="author" content="{{ site.author }}">
+    
+    <!-- Open Graph / 社交媒体分享 -->
+    <meta property="og:title" content="{{ page.title | default: site.title }}">
+    <meta property="og:description" content="{{ page.description | default: site.description }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ page.url | absolute_url }}">
+    
+    <!-- CSS 样式 -->
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    
+    <!-- 网站图标（可选）
+         将 favicon.ico 放在根目录或取消下面注释使用外部图标
+    -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico"> -->
+</head>
+<body>
+    <!-- 页面头部 -->
+    <header class="site-header">
+        <div class="container">
+            <!-- 网站标题/Logo -->
+            <a href="{{ '/' | relative_url }}" class="site-title">
+                {{ site.title }}
+            </a>
+            
+            <!-- 导航菜单 -->
+            <nav class="site-nav">
+                {% for item in site.navigation %}
+                <a href="{{ item.url | relative_url }}" class="nav-link">
+                    {{ item.name }}
+                </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="site-main">
+        <div class="container">
+            <!-- 页面标题 -->
+            {% if page.title %}
+            <h1 class="page-title">{{ page.title }}</h1>
+            {% endif %}
+            
+            <!-- 页面内容 -->
+            <div class="page-content">
+                {{ content }}
+            </div>
+        </div>
+    </main>
+
+    <!-- 页面底部 -->
+    <footer class="site-footer">
+        <div class="container">
+            <!-- 版权信息 -->
+            <p class="copyright">
+                &copy; {{ site.time | date: '%Y' }} {{ site.author }}. 
+                使用 <a href="https://pages.github.com/" target="_blank">GitHub Pages</a> 
+                和 <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> 构建。
+            </p>
+            
+            <!-- 社交媒体链接 -->
+            {% if site.social %}
+            <div class="social-links">
+                {% if site.social.github %}
+                <a href="https://github.com/{{ site.social.github }}" target="_blank" class="social-link">
+                    GitHub
+                </a>
+                {% endif %}
+                {% if site.social.twitter %}
+                <a href="https://twitter.com/{{ site.social.twitter }}" target="_blank" class="social-link">
+                    Twitter
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </footer>
+</body>
+</html>

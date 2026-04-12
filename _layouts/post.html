@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     文章布局模板 (_layouts/post.html)
+     所有博客文章会使用这个模板
+============================================================= -->
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 页面标题 -->
+    <title>{{ page.title }} | {{ site.title }}</title>
+    
+    <!-- 页面描述（SEO） -->
+    <meta name="description" content="{{ page.description | default: page.excerpt | strip_html | truncate: 160 }}">
+    
+    <!-- 作者信息 -->
+    <meta name="author" content="{{ page.author | default: site.author }}">
+    
+    <!-- 发布日期 -->
+    <meta name="date" content="{{ page.date | date_to_xmlschema }}">
+    
+    <!-- Open Graph / 社交媒体分享 -->
+    <meta property="og:title" content="{{ page.title }}">
+    <meta property="og:description" content="{{ page.description | default: page.excerpt | strip_html | truncate: 160 }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ page.url | absolute_url }}">
+    <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
+    <meta property="article:author" content="{{ page.author | default: site.author }}">
+    
+    <!-- CSS 样式 -->
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+</head>
+<body>
+    <!-- 页面头部 -->
+    <header class="site-header">
+        <div class="container">
+            <a href="{{ '/' | relative_url }}" class="site-title">
+                {{ site.title }}
+            </a>
+            
+            <nav class="site-nav">
+                {% for item in site.navigation %}
+                <a href="{{ item.url | relative_url }}" class="nav-link">
+                    {{ item.name }}
+                </a>
+                {% endfor %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="site-main">
+        <article class="post">
+            <div class="container">
+                <!-- 文章头部 -->
+                <header class="post-header">
+                    <h1 class="post-title">{{ page.title }}</h1>
+                    
+                    <!-- 文章元信息 -->
+                    <div class="post-meta">
+                        <span class="post-date">
+                            📅 {{ page.date | date: "%Y年%m月%d日" }}
+                        </span>
+                        
+                        {% if page.categories %}
+                        <span class="post-categories">
+                            📁 {% for category in page.categories %}
+                                <a href="/categories/#{{ category }}">{{ category }}</a>
+                                {% unless forloop.last %}, {% endunless %}
+                            {% endfor %}
+                        </span>
+                        {% endif %}
+                        
+                        {% if page.tags %}
+                        <span class="post-tags">
+                            🏷️ {% for tag in page.tags %}
+                                <a href="/tags/#{{ tag }}">{{ tag }}</a>
+                                {% unless forloop.last %}, {% endunless %}
+                            {% endfor %}
+                        </span>
+                        {% endif %}
+                        
+                        {% if page.author %}
+                        <span class="post-author">
+                            ✍️ {{ page.author }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </header>
+                
+                <!-- 文章内容 -->
+                <div class="post-content">
+                    {{ content }}
+                </div>
+                
+                <!-- 文章底部 -->
+                <footer class="post-footer">
+                    <!-- 分享按钮（可选） -->
+                    <div class="post-share">
+                        <p>分享这篇文章：</p>
+                        <a href="https://twitter.com/intent/tweet?text={{ page.title | url_encode }}&url={{ page.url | absolute_url | url_encode }}" 
+                           class="share-link" target="_blank">
+                            Twitter
+                        </a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ page.url | absolute_url | url_encode }}" 
+                           class="share-link" target="_blank">
+                            Facebook
+                        </a>
+                    </div>
+                    
+                    <!-- 上一篇/下一篇文章导航 -->
+                    <div class="post-navigation">
+                        {% if page.previous %}
+                        <a href="{{ page.previous.url | relative_url }}" class="nav-previous">
+                            ← {{ page.previous.title }}
+                        </a>
+                        {% endif %}
+                        
+                        {% if page.next %}
+                        <a href="{{ page.next.url | relative_url }}" class="nav-next">
+                            {{ page.next.title }} →
+                        </a>
+                        {% endif %}
+                    </div>
+                </footer>
+            </div>
+        </article>
+    </main>
+
+    <!-- 页面底部 -->
+    <footer class="site-footer">
+        <div class="container">
+            <p class="copyright">
+                &copy; {{ site.time | date: '%Y' }} {{ site.author }}. 
+                使用 <a href="https://pages.github.com/" target="_blank">GitHub Pages</a> 
+                和 <a href="https://jekyllrb.com/" target="_blank">Jekyll</a> 构建。
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

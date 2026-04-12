@@ -1,0 +1,26 @@
+# Jekyll 构建目录（自动生成，不需要提交）
+_site/
+.sass-cache/
+
+# Ruby/Bundler
+.bundle/
+Gemfile.lock
+vendor/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+
+# 临时文件
+tmp/
+.cache/
