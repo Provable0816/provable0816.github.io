@@ -29,6 +29,13 @@ markdown: kramdown           # Markdown 解析器（推荐 kramdown）
 highlighter: rouge           # 代码高亮器
 timezone: Asia/Shanghai      # 时区设置
 
+kramdown:
+  math_engine: mathjax
+  math_engine_opts:
+    preview: false
+    skip_html: false
+
+
 # 永久链接格式（文章 URL 格式）
 # 可选：date, pretty, ordinal, none, 或自定义格式
 permalink: /:year/:month/:day/:title/
