@@ -6,16 +6,16 @@
 # 复制此文件来创建新文章，修改文件名和以下内容
 
 layout: post                          # 使用文章布局模板
-title: "红外与可见光图像融合研究分析报告"               # 文章标题
-date: 2026-04-14 00:00:00 +0800      # 发布日期和时间（格式：YYYY-MM-DD HH:MM:SS +时区）
+title: "Epro-PnP"               # 文章标题
+date: 2026-09-05 00:00:00 +0800      # 发布日期和时间（格式：YYYY-MM-DD HH:MM:SS +时区）
 categories:                          # 文章分类（可选）
   - 生活
   - 技术
 tags:                                # 文章标签（可选）
-  - 入门
+  - PnP
   - github
   - jekyll
-description: "红外与可见光图像融合研究分析报告"  # 文章描述，用于 SEO 和列表页显示
+description: "Epro-PnP"  # 文章描述，用于 SEO 和列表页显示
 author: "你的名字"                    # 文章作者（可选，覆盖全局设置）
 ---
 
