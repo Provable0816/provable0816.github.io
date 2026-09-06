@@ -25,23 +25,14 @@
     
     <!-- CSS 样式 -->
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+
+    <!-- 数学公式 MathJax -->
+    {% include mathjax.html %}
     
     <!-- 网站图标（可选）
          将 favicon.ico 放在根目录或取消下面注释使用外部图标
     -->
     <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico"> -->
-
-
-     <!-- 数学公式 -->
-    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
-    <script type="text/x-mathjax-config">
-        MathJax.Hub.Config({
-            tex2jax: {
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-            inlineMath: [['$','$']]
-            }
-        });
-    </script>
 
 </head>
 <body>

@@ -25,7 +25,7 @@ plugins:
 # ------------------------------------------------------------
 # 构建设置
 # ------------------------------------------------------------
-markdown: kramdown           # Markdown 解析器（推荐 kramdown）
+markdown: kramdown           # Markdown 解析器（推荐 kramdown；配合 _plugins/math_fix.rb 支持 $...$ 行内公式）
 highlighter: rouge           # 代码高亮器
 timezone: Asia/Shanghai      # 时区设置
 

@@ -401,3 +401,30 @@ a:hover {
 .hidden {
     display: none;
 }
+
+/* ------------------------------------------------------------
+   MathJax 公式显示优化
+------------------------------------------------------------- */
+.post-content,
+.page-content {
+    overflow-x: auto;
+}
+
+mjx-container[display="true"] {
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    margin: 0.8em 0;
+}
+
+mjx-container[display="true"]::after {
+    content: "";
+    display: block;
+}
+
+.post-content table,
+.page-content table {
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+}
