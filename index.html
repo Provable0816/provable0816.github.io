@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>provable0816 · 个人主页与技术博客</title>
+  <meta name="description" content="记录工程实践与数学思考的个人站点 —— 支持 Markdown 与 LaTeX 公式的技术博客。">
+  <meta property="og:title" content="provable0816 · 个人主页与技术博客">
+  <meta property="og:description" content="记录工程实践与数学思考的个人站点。">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    // 尽早应用主题，避免深色模式刷新时闪白
+    (function () {
+      var t = localStorage.getItem('theme');
+      if (t) document.documentElement.dataset.theme = t;
+      else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.dataset.theme = 'dark';
+    })();
+  </script>
+
+</head>
+<body>
+  <a class="skip-link" href="#app">跳到正文</a>
+
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#/">provable0816<span class="brand-dot">.</span></a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="#/" data-nav="home">首页</a>
+        <a href="#/blog" data-nav="blog">博客</a>
+        <a href="#/about" data-nav="about">关于</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切换深浅色主题">
+          <span class="theme-icon-dark" aria-hidden="true">☾</span>
+          <span class="theme-icon-light" aria-hidden="true">☀</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1">
+    <div class="boot-loading">
+      <p class="mono-dim">正在加载…</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p id="footer-copy"></p>
+      <p class="footer-meta">
+        用 Markdown 书写 · 公式由 KaTeX 渲染 ·
+        <a id="footer-github" href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+      </p>
+    </div>
+  </footer>
+
+  <noscript>
+    <p style="text-align:center;padding:2rem;font-family:sans-serif">
+      本站需要启用 JavaScript 才能渲染 Markdown 文章。
+    </p>
+  </noscript>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="js/main.js" defer></script>
+</body>
+</html>

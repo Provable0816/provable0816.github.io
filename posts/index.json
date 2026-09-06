@@ -1,0 +1,16 @@
+[
+  {
+    "slug": "markdown-and-latex-guide",
+    "title": "Markdown 与 LaTeX 公式完全演示",
+    "date": "2026-09-05",
+    "tags": ["Markdown", "LaTeX", "写作"],
+    "description": "一篇把本站支持的全部排版能力演示一遍的文章：标题、表格、代码高亮、行内与独立公式、矩阵与多行推导。也可以当作写作速查手册。"
+  },
+  {
+    "slug": "hello-world",
+    "title": "你好，世界",
+    "date": "2026-09-01",
+    "tags": ["随笔"],
+    "description": "为什么要在 GitHub 上写博客，以及这个站点是怎么搭起来的。"
+  }
+]
