@@ -12,5 +12,12 @@
     "date": "2026-09-01",
     "tags": ["随笔"],
     "description": "为什么要在 GitHub 上写博客，以及这个站点是怎么搭起来的。"
+  },
+  {
+    "slug": "Epro-PnP",
+    "title": "Epro-PnP",
+    "date": "2026-09-07",
+    "tags": ["PnP"],
+    "description": "Epro-PnP"
   }
 ]
