@@ -3,7 +3,8 @@
   换头像：把你自己的照片放进 assets/ 目录，命名为 avatar.jpg，
   然后把下面 <img> 标签里的 assets/avatar.svg 改成 assets/avatar.jpg。
 -->
-<p><img src="assets/avatar.svg" alt="头像" class="about-avatar"></p>
+<!-- <p><img src="assets/avatar.svg" alt="头像" class="about-avatar"></p> -->
+<p><img src="assets/nm.jpg" alt="头像" class="about-avatar"></p>
 
 你好，我是 **provable0816**。（这是一段占位简介 —— 把它换成你自己的故事：你是谁、在做什么、对什么着迷。）
 
