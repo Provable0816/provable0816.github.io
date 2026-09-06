@@ -1,4 +1,4 @@
-<!-- MathJax v3：渲染行内/块级 LaTeX 公式（多 CDN 自动回退，兼容国内网络） -->
+<!-- MathJax v3：渲染行内/块级 LaTeX 公式 -->
 <script>
   window.MathJax = {
     tex: {
@@ -13,26 +13,8 @@
     chtml: { scale: 1.0 }
   };
 </script>
-<script>
-  (function () {
-    var urls = [
-      // 国内可达（静态资源站）
-      'https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js',
-      'https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js',
-      // 国际 CDN
-      'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js',
-      'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js',
-      'https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js'
-    ];
-    var i = 0;
-    function tryLoad() {
-      if (i >= urls.length) return;
-      var s = document.createElement('script');
-      s.id = 'MathJax-script';
-      s.src = urls[i++];
-      s.onerror = tryLoad;            // 当前 CDN 失败则换下一个
-      document.head.appendChild(s);
-    }
-    tryLoad();
-  })();
-</script>
+<!-- 优先加载站点自带的 MathJax（同源，保证可获取）；失败则回退到多个 CDN -->
+<script async
+  id="MathJax-script"
+  src="{{ '/assets/js/tex-mml-chtml.js' | relative_url }}"
+  onerror="this.remove();(function(){var u=['https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js','https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js','https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js','https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js','https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js'];var i=0;(function n(){if(i>=u.length)return;var s=document.createElement('script');s.async=true;s.id='MathJax-script';s.src=u[i++];s.onerror=n;document.head.appendChild(s);})();})();"></script>
