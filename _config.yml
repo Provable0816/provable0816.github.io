@@ -13,16 +13,6 @@ author: "Provable"                       # 作者名称
 email: "your-email@example.com"         # 联系邮箱
 
 # ------------------------------------------------------------
-# GitHub Pages 设置
-# ------------------------------------------------------------
-# 使用 GitHub 官方主题（可选，删除此行可使用自定义主题）
-remote_theme: pages-themes/minimal@v0.2.0
-
-# 包含 Jekyll 默认插件
-plugins:
-  - jekyll-remote-theme
-
-# ------------------------------------------------------------
 # 构建设置
 # ------------------------------------------------------------
 markdown: kramdown           # Markdown 解析器（推荐 kramdown；配合 _plugins/math_fix.rb 支持 $...$ 行内公式）
