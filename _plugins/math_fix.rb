@@ -17,29 +17,33 @@
 #   2) 在把内容交给 kramdown 之前做预处理（通过 pre_render hook）：把 `$...$`
 #      内的裸竖线 `|` 替换成 `\vert `（MathJax 的“单竖线”，末尾加空格防止
 #      被 TeX 读成 `\vertX`），使 kramdown 不再误判为表格，且渲染为 `p(y|X)`。
+#
+#  注意：这里采用“惰性补丁”——直到第一次真正转换前才 require kramdown 并打补丁，
+#  避免在插件加载阶段 kramdown 尚未就绪导致的构建失败。
 # =========================================================================
 
-module Kramdown
-  module Parser
-    class Kramdown
-      # 单美元行内数学。开闭定界符必须是“单个 $”，不能是 `$$`：
-      #   (?!\$)  开头的 $ 不能被 $ 跟随（即不是 $$）
-      #   (?<!\\) 结束的 $ 前不能是反斜杠（避免误吞 \\$）
-      SINGLE_DOLLAR_INLINE_START = /\$(?!\$)(.*?)(?<!\\)\$(?!\$)/m
-
-      # kramdown 里 inline_math 这个解析器已经存在（只匹配 $$...$$），
-      # 这里原地替换它的匹配正则，使其也能匹配 $...$。
-      parser(:inline_math).start_re = SINGLE_DOLLAR_INLINE_START
-    end
-  end
-end
-
 module KramdownMathHelpers
-  INLINE_MATH = /\$(?!\$)(.*?)(?<!\\)\$(?!\$)/m
+  # 单美元行内数学。开闭定界符必须是“单个 $”，不能是 `$$`：
+  #   (?!\$)  开头的 $ 不能被 $ 跟随（即不是 $$）
+  #   (?<!\\) 结束的 $ 前不能是反斜杠（避免误吞 \\$）
+  SINGLE_DOLLAR_INLINE_START = /\$(?!\$)(.*?)(?<!\\)\$(?!\$)/m
+  INLINE_MATH = SINGLE_DOLLAR_INLINE_START
+
+  @patched = false
+
+  # 保证 kramdown 已加载，并把 inline_math 解析器改为也匹配单美元。
+  def self.ensure_patch!
+    return if @patched
+
+    require "kramdown"
+    Kramdown::Parser::Kramdown.parser(:inline_math).start_re = SINGLE_DOLLAR_INLINE_START
+    @patched = true
+  end
 
   # 把 $...$ 中的“裸竖线”替换成 \vert （末尾加空格，避免 TeX 把 \vertX
   # 当成一个未定义的控制序列）。已经转义的 \|（范数）不会被触碰。
   def self.protect(content)
+    ensure_patch!
     return content unless content.is_a?(String)
 
     content.gsub(INLINE_MATH) do |match|

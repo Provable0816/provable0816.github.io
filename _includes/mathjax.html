@@ -1,4 +1,4 @@
-<!-- MathJax v3：渲染行内/块级 LaTeX 公式 -->
+<!-- MathJax v3：渲染行内/块级 LaTeX 公式（多 CDN 自动回退，兼容国内网络） -->
 <script>
   window.MathJax = {
     tex: {
@@ -10,11 +10,29 @@
       skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
       enableMenu: false
     },
-    chtml: {
-      scale: 1.0
-    }
+    chtml: { scale: 1.0 }
   };
 </script>
-<script id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+<script>
+  (function () {
+    var urls = [
+      // 国内可达（静态资源站）
+      'https://cdn.staticfile.org/mathjax/3.2.2/es5/tex-mml-chtml.js',
+      'https://cdn.bootcdn.net/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js',
+      // 国际 CDN
+      'https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js',
+      'https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js',
+      'https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js'
+    ];
+    var i = 0;
+    function tryLoad() {
+      if (i >= urls.length) return;
+      var s = document.createElement('script');
+      s.id = 'MathJax-script';
+      s.src = urls[i++];
+      s.onerror = tryLoad;            // 当前 CDN 失败则换下一个
+      document.head.appendChild(s);
+    }
+    tryLoad();
+  })();
 </script>
