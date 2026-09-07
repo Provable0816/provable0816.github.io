@@ -21,13 +21,13 @@
 | 类别 | 内容 |
 | --- | --- |
 | 语言 | Python · JavaScript · C++（按实际情况修改） |
-| 领域 | 机器学习 · 数值计算 · 后端开发 |
+| 领域 | 人工智能 · 智能显示系统 · 智能工具系统 |
 | 工具 | Git · Linux · VS Code |
 
 ## 找到我
 
 - GitHub：[provable0816](https://github.com/provable0816)
-- 邮箱：me@example.com（改成你自己的）
+- 邮箱：745134809 {AT} qq {dot} com （改成你自己的）
 - 其他链接：知乎 / 掘金 / Twitter……（自行增删）
 
 ---
