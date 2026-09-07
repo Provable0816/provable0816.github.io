@@ -143,6 +143,32 @@ function extractMath(src) {
       continue;
     }
 
+    /* ---- 强调分隔符的中文侧翼修复 ----
+       CommonMark 规定：`**` 后面紧跟标点（如 **"xxx"**、**（xx）**）且前面是汉字时
+       无法开启加粗，会原样输出星号。这里在分隔符内侧插入一个零宽空格（U+200B，
+       对 marked 既不算空白也不算标点），让侧翼判定通过。仅处理非代码区域。 */
+    if (src[i] === '*' || src[i] === '~') {
+      const c = src[i];
+      let k = 0;
+      while (src[i + k] === c) k++;
+      const prev = i > 0 ? src[i - 1] : undefined;
+      const next = src[i + k];
+      const P = /[\p{P}\p{S}]/u;
+      const L = /[\p{L}\p{N}\uE000-\uF8FF\u200B]/u; // 字母类（含数学占位符/已有零宽空格）
+      const run = src.slice(i, i + k);
+      const nextIsPunct = next !== undefined && next !== '\n' && P.test(next);
+      const prevIsPunct = prev !== undefined && prev !== '\n' && P.test(prev);
+      if (nextIsPunct && (prev === undefined || L.test(prev))) {
+        out += run + '\u200B'; // 开启侧被标点挡住 → 零宽空格放内侧
+      } else if (prevIsPunct && next !== undefined && L.test(next)) {
+        out += '\u200B' + run; // 关闭侧被标点挡住 → 零宽空格放内侧
+      } else {
+        out += run;
+      }
+      i += k;
+      continue;
+    }
+
     /* ---- 公式 ---- */
     if (src[i] === '$' && src[i + 1] === '$') {
       const end = src.indexOf('$$', i + 2);
