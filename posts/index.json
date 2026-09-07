@@ -19,5 +19,12 @@
     "date": "2026-09-07",
     "tags": ["PnP"],
     "description": "Epro-PnP"
+  },
+  {
+    "slug": "IVIF-research",
+    "title": "IVIF-research",
+    "date": "2026-09-07",
+    "tags": ["IVIF"],
+    "description": "IVIF-research"
   }
 ]
