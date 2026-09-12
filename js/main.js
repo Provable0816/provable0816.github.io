@@ -401,13 +401,125 @@ async function viewBlog() {
   }
 }
 
+/* ------------------------------ 文章目录 ------------------------------ */
+
+const TOC_SELECTOR = 'h2, h3'; // 收录哪些标题；只想收二级标题就改成 'h2'
+const TOC_MIN_ITEMS = 3;       // 标题少于这个数量就不单开一栏
+
+let tocState = null;
+
+/** 标题文本 → 可用作 id 的短串（保留中英文与数字） */
+function slugifyHeading(text) {
+  return String(text).trim().toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\u3400-\u4dbf\u4e00-\u9fff-]/g, '')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}
+
+function renderTocList(nodes, depth) {
+  const lis = nodes.map((n) => {
+    const kids = n.children && n.children.length ? renderTocList(n.children, depth + 1) : '';
+    return `<li><button type="button" class="toc-link" data-toc="${escapeHtml(n.id)}">${escapeHtml(n.text)}</button>${kids}</li>`;
+  });
+  return `<ul class="toc-l${depth}">${lis.join('')}</ul>`;
+}
+
+/**
+ * 把正文标题渲染成左侧目录。
+ * 本站路由跑在 location.hash 上，所以目录项用 button + scrollIntoView，
+ * 而不是 <a href="#id">——否则滚动会改掉 hash，被路由当成页面跳转。
+ */
+function mountToc(article, aside) {
+  tocState = null;
+  if (!article || !aside) return;
+  const heads = [...article.querySelectorAll(TOC_SELECTOR)].filter((h) => h.textContent.trim());
+  if (heads.length < TOC_MIN_ITEMS) return;
+
+  const used = new Set();
+  const tree = [];
+  const flat = [];
+
+  heads.forEach((h, i) => {
+    let id = h.id;
+    if (!id || used.has(id)) {
+      const base = slugifyHeading(h.textContent) || `section-${i + 1}`;
+      id = base;
+      let n = 1;
+      while (used.has(id)) id = `${base}-${++n}`;
+      h.id = id;
+    }
+    used.add(id);
+
+    const item = { id, level: h.tagName === 'H2' ? 1 : 2, text: h.textContent.trim(), el: h, btn: null };
+    flat.push(item);
+    // h3 挂到前一个 h2 之下；若文章开头就是 h3，就当作顶层
+    if (item.level === 2 && tree.length) tree[tree.length - 1].children.push(item);
+    else tree.push({ ...item, children: [] });
+  });
+
+  aside.innerHTML = `<p class="post-toc-title">目录</p>${renderTocList(tree, 1)}`;
+
+  const buttons = [...aside.querySelectorAll('.toc-link')];
+  if (buttons.length !== flat.length) return; // 理论上不会，保险起见
+  flat.forEach((it, i) => { it.btn = buttons[i]; });
+
+  const layout = aside.closest('.post-layout');
+  if (layout) layout.classList.add('has-toc');
+  tocState = { aside, items: flat, active: null };
+
+  buttons.forEach((btn, i) => {
+    btn.addEventListener('click', () => { flat[i].el.scrollIntoView(); });
+  });
+
+  updateTocActive();
+}
+
+/** 滚动时高亮当前所在的小节 */
+function updateTocActive() {
+  if (!tocState) return;
+  const { aside, items } = tocState;
+  if (!document.body.contains(aside)) { tocState = null; return; }
+
+  const offset = (siteHeader ? siteHeader.offsetHeight : 64) + 24;
+  let current = items[0];
+  for (const it of items) {
+    if (it.el.getBoundingClientRect().top <= offset) current = it;
+    else break;
+  }
+  if (tocState.active === current.id) return;
+  tocState.active = current.id;
+
+  items.forEach((it) => {
+    const on = it === current;
+    it.btn.classList.toggle('active', on);
+    if (on) it.btn.setAttribute('aria-current', 'location');
+    else it.btn.removeAttribute('aria-current');
+  });
+
+  // 让高亮项留在目录自身的可视范围内（只动目录的滚动，不影响页面）
+  const b = current.btn.getBoundingClientRect();
+  const box = aside.getBoundingClientRect();
+  if (b.top < box.top) aside.scrollTop -= box.top - b.top + 10;
+  else if (b.bottom > box.bottom) aside.scrollTop += b.bottom - box.bottom + 10;
+}
+
+let tocRaf = 0;
+window.addEventListener('scroll', () => {
+  if (tocRaf) return;
+  tocRaf = requestAnimationFrame(() => { tocRaf = 0; updateTocActive(); });
+}, { passive: true });
+
 /* ------------------------------ 文章页 ------------------------------ */
 
 async function viewPost(slug) {
   $app.innerHTML = `
-  <div class="page-narrow">
-    <a class="back-link" href="#/blog">← 返回文章列表</a>
-    <div id="post-body"><p class="mono-dim">正在加载…</p></div>
+  <div class="post-layout">
+    <nav class="post-toc" id="post-toc" aria-label="文章目录"></nav>
+    <div class="post-main">
+      <a class="back-link" href="#/blog">← 返回文章列表</a>
+      <div id="post-body"><p class="mono-dim">正在加载…</p></div>
+    </div>
   </div>`;
   const body = document.getElementById('post-body');
 
@@ -463,6 +575,7 @@ async function viewPost(slug) {
     ${nav}`;
 
   enhanceContent(document.getElementById('prose'));
+  mountToc(document.getElementById('prose'), document.getElementById('post-toc'));
 }
 
 /* ------------------------------ 关于页 ------------------------------ */
