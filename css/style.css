@@ -306,7 +306,8 @@ a:hover { color: var(--accent-strong); text-decoration: underline; text-underlin
   grid-template-columns: minmax(0, calc(var(--measure) - 3rem));
   justify-content: center; align-items: start;
 }
-.post-main { grid-column: 1; min-width: 0; }
+/* 注意：不要用 .post-main —— 博客列表项的内容容器已占用该名字 */
+.post-content { grid-column: 1; min-width: 0; }
 
 .post-toc { display: none; }
 
@@ -315,7 +316,7 @@ a:hover { color: var(--accent-strong); text-decoration: underline; text-underlin
     grid-template-columns: 15rem minmax(0, calc(var(--measure) - 3rem));
     gap: 0 2.25rem;
   }
-  .post-layout.has-toc .post-main { grid-column: 2; }
+  .post-layout.has-toc .post-content { grid-column: 2; }
   .post-layout.has-toc .post-toc {
     display: block; grid-column: 1;
     position: sticky; top: 5.5rem;

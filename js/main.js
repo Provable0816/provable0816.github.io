@@ -516,7 +516,7 @@ async function viewPost(slug) {
   $app.innerHTML = `
   <div class="post-layout">
     <nav class="post-toc" id="post-toc" aria-label="文章目录"></nav>
-    <div class="post-main">
+    <div class="post-content">
       <a class="back-link" href="#/blog">← 返回文章列表</a>
       <div id="post-body"><p class="mono-dim">正在加载…</p></div>
     </div>
