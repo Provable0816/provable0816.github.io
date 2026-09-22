@@ -17,11 +17,11 @@ tags: Agent
 
 **2025 年的合格工作主要集中在 NLP 与多模态会议，2026 年则开始向算法理论与服务系统两端扩散。** 本报告的主表 37 篇中，ACL 主会 4 篇、ACL Findings 8 篇、EMNLP 主会 3 篇、EMNLP Findings 8 篇、NAACL Findings 1 篇、CVPR 3 篇、ICCV 1 篇、NeurIPS 4 篇、AAAI 1 篇、KDD 1 篇、ICLR 2 篇（另有 COLING、SIGIR、ICML、workshop 与 Industry/Demo 通道论文未列入此行统计）。会议数量本身不是“发文热度”的精确指标，因为各会议篇幅、主题与 Findings 通道不同；但它清楚显示 ACL/EMNLP 是最大承载场，原因正是这些方法天然处理语言规划、工具调用、检索、提示和复杂推理。2026 年样本虽早，已出现 ICML 的 test-time distribution sharpening、AAAI 的在线多 LLM bandit 选择、ICLR/ICML 的推理程序与时延优化，说明问题正从“编排是否有效”走向“如何在预算、版本漂移和延迟约束下做到最优”。
 
-![ACL 体系与 Findings 通道构成主表论文主体](./assets/fig_venue.png)
+![ACL 体系与 Findings 通道构成主表论文主体](./assets/AI顶会免训练API方法调研报告/fig_venue.png)
 
 *图 1：ACL 体系与 Findings 通道构成 2025—2026 年主表论文的主体。数据来源：ACL Anthology、CVF、NeurIPS、AAAI、ICLR 官方页面 [1]—[40]；Findings 与主会分别统计。*
 
-[下载会议分布数据](./assets/data_venue.csv)
+[下载会议分布数据](./assets/AI顶会免训练API方法调研报告/data_venue.csv)
 
 **真正的方法创新，是让多个“不可改权重”的模块协作形成一个更高层的算法。** 早期提示工程往往只改输入字符串；2025 年的代表工作已普遍构建有状态流程：先路由或分类，再决定调用几个模型、检索哪些证据、生成几段推理、调用何种工具、由谁验证、何时停止。SkyLLM 不直接训练模型，却维护 API 效用估计与选择机制；CER 不更新 GPT-4o，却把过往轨迹压缩为上下文记忆；RPC 不更新生成器，却用困惑度一致性与路径剪枝重新聚合多条采样。它们证明，在基座能力已经足够时，性能瓶颈常位于系统层：该不该调用、调用哪个、生成几条、如何验证、何时退出。
 
@@ -31,9 +31,9 @@ tags: Agent
 
 **主表严格限定为“有方法创新、免训练、核心依赖 API/现成模型服务”的论文。** 下表按技术范式组织。对部分 ACL workshop（如 BabyLM、KnowledgeNLP）标注其非主会属性；它们仍属于 ACL Anthology 收录，但不与主会等同。2026 部分仅纳入在官方 proceedings、ICML virtual、AAAI proceedings 或明确接收页中可追溯的工作；截至 2026 年 9 月，IJCAI-ECAI 2026 大会实际举行于 2026 年 8 月后，故其“已公布论文”需以大会最终 program 复核，本报告不把 arXiv 投稿冒认为正式收录。
 
-[下载范式分类数据](./assets/data_paradigm.csv)
+[下载范式分类数据](./assets/AI顶会免训练API方法调研报告/data_paradigm.csv)
 
-![Agent、RAG 与推理时扩展是免训练 API 方法的三大集中方向](./assets/fig_paradigm.png)
+![Agent、RAG 与推理时扩展是免训练 API 方法的三大集中方向](./assets/AI顶会免训练API方法调研报告/fig_paradigm.png)
 
 *图 2：Agent、RAG 与推理时扩展是免训练 API 方法的三大集中方向。数据来源：本报告核实的 40 篇主表论文；多范式论文按主贡献归类。*
 
@@ -624,7 +624,6 @@ tags: Agent
 | 2 | **[45] 的链接指错论文**：`Enhancing LLM Agent Safety via Causal Influence Prompting` 被链到 `https://aclanthology.org/2025.acl-long.694/` | 该 URL 是 CER（Contextual Experience Replay）。Causal Influence Prompting 的正确出处为 **ACL 2025 Findings，2025.findings-acl.784**（arXiv 2507.00979 的 comment 明确写 "Accepted at ACL 2025 Findings"，OpenAlex DOI = 10.18653/v1/2025.findings-acl.784） | 改为 [2025.findings-acl.784](https://aclanthology.org/2025.findings-acl.784/)；同时删除或改写 [48] 关于「AAAI 版本无法独立核实」的说明 |
 | 3 | **ACL 2026 整届缺失** | ACL 2026 已在 ACL Anthology 出版（本次抓取到 **6,422 条**条目）。该类方法在 ACL 2026 的密度显著高于 2025 | 至少补入本文第二章方向一/二/三/四中标注为 ACL 2026 的 20 篇 |
 | 4 | **[54] [55] 被错误地排除在主表之外** | [54] = `Invoke Interfaces Only When Needed: Adaptive Invocation for LLMs in QA`（Findings of EMNLP 2025，摘要原句 "eliminate the need for additional model training"）；[55] = `AskToAct`（EMNLP 2025 主会，"without additional training, achieving performance comparable to GPT-4o"）。两篇都符合主表的严格口径 | 把这两条从「引用来源」升格为主表条目，并补上核心指标 |
-| 5 | **报告引用的图示与数据文件在本目录中不存在** | 目录内只有 `AI顶会免训练API方法调研报告.md` 一个文件，`./assets/fig_venue.png`、`fig_paradigm.png`、`data_venue.csv`、`data_paradigm.csv` 均缺失 | 补生成，或删掉图注中的相对链接以免误导 |
 
 ## 3.2 标题与条目不精确（影响检索与引用）
 
