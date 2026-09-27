@@ -7,7 +7,7 @@ tags: 记忆压缩
 # 大模型 / Agent 记忆压缩：顶会论文总体综述报告
 
 > 语料日期：2026-09-27　|　精读规模：**221 篇 = 207 篇主会 + 14 篇非主会补充**（其中 145 篇七段式深度报告、76 篇结构简报）
-> 逐篇报告见 `reports/P001.md` … `reports/P221.md`；总索引见 `papers.md`
+> 逐篇报告见 [`Agent记忆papers/P001.md`](Agent记忆papers/P001.md) … [`Agent记忆papers/P221.md`](Agent记忆papers/P221.md)；总索引见 [`papers.md`](Agent记忆papers/papers.md)
 
 ---
 
@@ -41,7 +41,7 @@ tags: 记忆压缩
 
 ### 1.2 排除标准
 
-按需求排除 **Findings / Workshop / Tutorial / Demo / Doctoral Consortium** 与**分会**，并按以下判据排除主题不符的工作（详见 `papers.md` 第三节）：
+按需求排除 **Findings / Workshop / Tutorial / Demo / Doctoral Consortium** 与**分会**，并按以下判据排除主题不符的工作（详见 [`papers.md`](Agent记忆papers/papers.md) 第三节）：
 
 - 灾难性遗忘 / 机器遗忘：压缩对象是参数中的知识，不是推理期记忆；
 - 权重与训练显存压缩（量化、剪枝、低秩训练、优化器状态）：压缩对象是参数或训练状态；
@@ -289,7 +289,7 @@ P210 被迫同时报告"总 token/调用"（38×/20.9×）与"纯在线成本"�
 
 ## 8. 阅读指南
 
-面对 221 篇报告，建议按以下四条路径切入（编号均可在 `papers.md` 与 `reports/` 中定位）：
+面对 221 篇报告，建议按以下四条路径切入（编号均可在 `papers.md` 与 `Agent记忆papers/` 中定位）：
 
 - **想快速建立全局判断（10 篇）**：P003、P178、P221（三次不同的"目标函数对齐"示范）→ P199、P183（被忽视的轴）→ P180、P214（时变与可逆）→ P210、P219（系统与调度）→ P175（认知框架）。
 - **做 KV 系统优化**：P083/P084/P087/P090/P091（层头预算）→ P101/P102/P159/P174（位宽）→ P199/P089/P183（特征维）→ P178/P214（可逆）→ P219/P204/P207（系统复用与路由）。
@@ -322,8 +322,8 @@ P210 被迫同时报告"总 token/调用"（38×/20.9×）与"纯在线成本"�
 
 | 交付物 | 位置 | 规模 |
 | --- | --- | --- |
-| 逐篇阅读报告（Tier A 深度 / Tier B 简报） | `reports/P001.md` … `reports/P221.md` | 221 篇，约 1.0 MB |
-| 报告撰写规范 | `reports/_instructions.md`、`reports/_template.md` | — |
+| 逐篇阅读报告（Tier A 深度 / Tier B 简报） | `Agent记忆papers/P001.md` … `Agent记忆papers/P221.md` | 221 篇，约 1.0 MB |
+| 报告撰写规范 | `Agent记忆papers/_instructions.md`、`Agent记忆papers/_template.md` | — |
 | 总索引（含 221 篇精读清单 + 相邻未精读论文 + 排除标准） | `papers.md` | 924 行 |
 | 本综述报告 | `SURVEY.md` | — |
 | 全文语料（PDF / 纯文本） | `cache/pdf/`、`cache/txt/` | 665 MB / 17.8 MB |
