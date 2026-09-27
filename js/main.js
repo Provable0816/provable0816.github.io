@@ -48,9 +48,18 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
 /* ------------------------------ 页头滚动效果 ------------------------------ */
 
 const siteHeader = document.getElementById('site-header');
+const toTopBtn = document.getElementById('to-top');
+function syncToTop() {
+  // 往下读过大约一屏才显示「回到顶部」
+  if (toTopBtn) toTopBtn.classList.toggle('visible', window.scrollY > window.innerHeight * 0.8);
+}
 window.addEventListener('scroll', () => {
   siteHeader.classList.toggle('scrolled', window.scrollY > 12);
+  syncToTop();
 }, { passive: true });
+
+// 平滑回顶交给 CSS 的 scroll-behavior: smooth
+if (toTopBtn) toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, left: 0 }));
 
 /* ==========================================================================
    Markdown + LaTeX 渲染管线
