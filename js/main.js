@@ -251,6 +251,11 @@ function enhanceContent(container) {
 const POST_DIR = 'posts/';
 const MD_LINK_RE = /\.md$/i;
 
+/** decodeURIComponent，遇到坏编码就原样返回 */
+function dec(s) {
+  try { return decodeURIComponent(s); } catch (_) { return s; }
+}
+
 /** 把指向 posts/*.md 的链接换算成站内路由；返回 null 表示无需改写 */
 function docLinkToRoute(rawHref) {
   let h = String(rawHref || '').trim();
@@ -265,12 +270,30 @@ function docLinkToRoute(rawHref) {
   h = h.replace(/^\.\//, '').replace(/^\/+/, '');
   const at = h.lastIndexOf(POST_DIR);
   if (at !== -1) h = h.slice(at + POST_DIR.length);
-  else if (h.includes('/')) h = h.slice(h.lastIndexOf('/') + 1);
 
-  let slug = h.replace(MD_LINK_RE, '');
-  try { slug = decodeURIComponent(slug); } catch (_) { /* 保留原样 */ }
+  // 路径按「相对 posts/」解析，支持子目录：
+  // 主文档在 posts/ 下写 Agent记忆papers/papers.md → #/post/Agent记忆papers/papers
+  const segs = [];
+  for (const seg of h.split('/')) {
+    if (!seg || seg === '.') continue;
+    if (seg === '..') { segs.pop(); continue; } // 只向上退一层，逃不出 posts/
+    segs.push(seg);
+  }
+  if (!segs.length) return null;
+  segs[segs.length - 1] = segs[segs.length - 1].replace(MD_LINK_RE, '');
+  if (!segs[segs.length - 1]) return null;
+
+  const slug = segs.map(dec).join('/');
   if (!slug) return null;
-  return '#/post/' + encodeURIComponent(slug) + (frag ? '#' + frag : '');
+  return '#/post/' + slug.split('/').map(encodeURIComponent).join('/') + (frag ? '#' + frag : '');
+}
+
+/** 路由里的 slug 归一化：按段解码，丢掉空段与 . / ..（不允许越出 posts/） */
+function normalizeSlug(raw) {
+  return String(raw || '').split('/')
+    .filter((seg) => seg && seg !== '.' && seg !== '..')
+    .map(dec)
+    .join('/');
 }
 
 function rewriteDocLinks(container) {
@@ -353,6 +376,12 @@ function normalizeTags(raw) {
   if (Array.isArray(raw)) return raw.map(String);
   if (typeof raw === 'string') return raw.split(/[,，]/).map((s) => s.trim()).filter(Boolean);
   return [];
+}
+
+/** 取正文里第一个一级标题：子文档常常没有 frontmatter，用它当页面标题 */
+function firstHeading(md) {
+  const m = /^#[ \t]+(.+?)[ \t]*$/m.exec(md);
+  return m ? m[1].trim() : '';
 }
 
 /* ------------------------------ 文章清单 ------------------------------ */
@@ -630,7 +659,7 @@ async function viewPost(slug) {
 
   let md;
   try {
-    const res = await fetch('posts/' + encodeURIComponent(slug) + '.md', { cache: 'no-store' });
+    const res = await fetch('posts/' + slug.split('/').map(encodeURIComponent).join('/') + '.md', { cache: 'no-store' });
     if (!res.ok) throw new Error('post ' + res.status);
     md = await res.text();
   } catch (_) {
@@ -642,7 +671,7 @@ async function viewPost(slug) {
   }
 
   const { meta: fm, body: content } = parseFrontmatter(md);
-  const title = fm.title || (listMeta && listMeta.title) || slug;
+  const title = fm.title || (listMeta && listMeta.title) || firstHeading(content) || slug;
   const date = fm.date || (listMeta && listMeta.date) || '';
   const tags = fm.tags ? normalizeTags(fm.tags) : ((listMeta && listMeta.tags) || []);
   const minutes = readingTime(content);
@@ -736,16 +765,18 @@ async function route() {
   if (parts.length === 0) { setActiveNav('home'); await viewHome(); scrollTop(); return; }
   if (parts[0] === 'blog') { setActiveNav('blog'); await viewBlog(); scrollTop(); return; }
   if (parts[0] === 'about') { setActiveNav('about'); await viewAbout(); scrollTop(); return; }
-  if (parts[0] === 'post' && parts[1]) {
-    setActiveNav('blog');
-    // 支持深链 #/post/<slug>#<片段>：先渲染文章，再滚到指定小节
-    const [slugPart, ...fragParts] = parts[1].split('#');
-    let slug = slugPart;
-    try { slug = decodeURIComponent(slugPart); } catch (_) { /* 保留原样 */ }
-    await viewPost(slug);
-    scrollTop();
-    if (fragParts.length) scrollToAnchor(fragParts.join('#'));
-    return;
+  if (parts[0] === 'post' && parts.length > 1) {
+    // slug 可以带子目录（#/post/子目录/文件），末尾还可以带 #小节
+    const rest = parts.slice(1).join('/');
+    const cut = rest.indexOf('#');
+    const slug = normalizeSlug(cut === -1 ? rest : rest.slice(0, cut));
+    if (slug) {
+      setActiveNav('blog');
+      await viewPost(slug);
+      scrollTop();
+      if (cut !== -1) scrollToAnchor(rest.slice(cut + 1));
+      return;
+    }
   }
   setActiveNav(''); view404();
 }
