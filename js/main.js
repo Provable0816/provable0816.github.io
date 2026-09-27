@@ -643,12 +643,19 @@ window.addEventListener('scroll', () => {
 
 /* ------------------------------ 文章页 ------------------------------ */
 
-async function viewPost(slug) {
+async function viewPost(slug, fromSlug = '') {
+  // 「返回」指向来路那篇文章；从列表页或深链直接进来时，仍回文章列表
+  let backHtml = '<a class="back-link" href="#/blog">← 返回文章列表</a>';
+  if (fromSlug) {
+    const fromTitle = postTitles.get(fromSlug) || fromSlug;
+    const href = '#/post/' + fromSlug.split('/').map(encodeURIComponent).join('/');
+    backHtml = `<a class="back-link" href="${href}" title="${escapeHtml(fromTitle)}">← 返回 ${escapeHtml(shortTitle(fromTitle))}</a>`;
+  }
   $app.innerHTML = `
   <div class="post-layout">
     <nav class="post-toc" id="post-toc" aria-label="文章目录"></nav>
     <div class="post-content">
-      <a class="back-link" href="#/blog">← 返回文章列表</a>
+      ${backHtml}
       <div id="post-body"><p class="mono-dim">正在加载…</p></div>
     </div>
   </div>`;
@@ -672,6 +679,7 @@ async function viewPost(slug) {
 
   const { meta: fm, body: content } = parseFrontmatter(md);
   const title = fm.title || (listMeta && listMeta.title) || firstHeading(content) || slug;
+  postTitles.set(slug, title); // 供子文档页的「返回上一篇」显示来路文章名
   const date = fm.date || (listMeta && listMeta.date) || '';
   const tags = fm.tags ? normalizeTags(fm.tags) : ((listMeta && listMeta.tags) || []);
   const minutes = readingTime(content);
@@ -756,9 +764,32 @@ function setActiveNav(key) {
   });
 }
 
+/** 上一次渲染的 hash：文章页据此判断「来路」，把「返回」指向上一篇看过的文章 */
+let renderedHash = '';
+
+/** 从一段 hash 里取出文章 slug；不是文章页则返回空串 */
+function slugFromHash(hash) {
+  const parts = String(hash || '').replace(/^#/, '').split('/').filter(Boolean);
+  if (parts[0] !== 'post' || parts.length < 2) return '';
+  const rest = parts.slice(1).join('/');
+  const cut = rest.indexOf('#');
+  return normalizeSlug(cut === -1 ? rest : rest.slice(0, cut));
+}
+
+/** slug → 标题：渲染过的文章标题，「返回上一篇」用它显示来路文章名 */
+const postTitles = new Map();
+
+/** 截短标题，免得「← 返回 xxx」把首行撑得太长 */
+function shortTitle(t, max = 32) {
+  const s = String(t || '').trim();
+  return s.length > max ? s.slice(0, max) + '…' : s;
+}
+
 async function route() {
   const path = location.hash.replace(/^#/, '') || '/';
   const parts = path.split('/').filter(Boolean);
+  const fromSlug = slugFromHash(renderedHash); // 上一页也是文章时，记为「来路」
+  renderedHash = location.hash;
   scrollTop();
   document.title = `${SITE.name} · 个人主页与技术博客`;
 
@@ -772,7 +803,7 @@ async function route() {
     const slug = normalizeSlug(cut === -1 ? rest : rest.slice(0, cut));
     if (slug) {
       setActiveNav('blog');
-      await viewPost(slug);
+      await viewPost(slug, fromSlug === slug ? '' : fromSlug); // 同一篇不算来路
       scrollTop();
       if (cut !== -1) scrollToAnchor(rest.slice(cut + 1));
       return;
