@@ -358,8 +358,9 @@ document.addEventListener('click', (e) => {
   if (!scrollToAnchor(href.slice(1))) return;
 
   // 顺手把地址栏更新成可分享的深链 #/post/<slug>#<片段>
+  // 带上 history.state，别把历史条目的序号（判断前进/后退用）冲掉
   const seg = location.hash.slice(1).split('#');
-  if (/^\/post\//.test(seg[0])) history.replaceState(null, '', '#' + seg[0] + href);
+  if (/^\/post\//.test(seg[0])) history.replaceState(history.state, '', '#' + seg[0] + href);
 });
 
 /* ------------------------------ Frontmatter ------------------------------ */
@@ -646,12 +647,13 @@ window.addEventListener('scroll', () => {
 
 /* ------------------------------ 文章页 ------------------------------ */
 
-async function viewPost(slug, fromSlug = '') {
-  // 「返回」指向来路那篇文章；从列表页或深链直接进来时，仍回文章列表
+async function viewPost(slug, backHash = '') {
+  // 「返回」指向进入本页时的上级文章；从列表页或深链直接进来时，仍回文章列表
+  const backSlug = slugFromHash(backHash);
   let backHtml = '<a class="back-link" href="#/blog">← 返回文章列表</a>';
-  if (fromSlug) {
-    const fromTitle = postTitles.get(fromSlug) || fromSlug;
-    const href = '#/post/' + fromSlug.split('/').map(encodeURIComponent).join('/');
+  if (backSlug && backSlug !== slug) {
+    const fromTitle = postTitles.get(backSlug) || backSlug;
+    const href = '#/post/' + backSlug.split('/').map(encodeURIComponent).join('/');
     backHtml = `<a class="back-link" href="${href}" title="${escapeHtml(fromTitle)}">← 返回 ${escapeHtml(shortTitle(fromTitle))}</a>`;
   }
   $app.innerHTML = `
@@ -782,11 +784,25 @@ function slugFromHash(hash) {
 /** slug → 标题：渲染过的文章标题，「返回上一篇」用它显示来路文章名 */
 const postTitles = new Map();
 
-/** 路由 → 离开时的滚动位置：「返回上一篇」时用它恢复阅读位置 */
+/** 路由 → 离开时的滚动位置：「返回」时用它恢复阅读位置 */
 const scrollPositions = new Map();
 
-/** 由「返回」键 / 浏览器后退置位：下一次路由要恢复阅读位置而不是回到顶部 */
+/**
+ * 路由 → 进入它时的来路（上级）。
+ * 只在**向前导航**时写入；返回时不覆盖，所以同一页的「返回」始终指向同一个上级，
+ * 不会出现「从 A 进 B，退回 A 后 A 的返回键变成指向 B」这种来回横跳。
+ */
+const entryFrom = new Map();
+
+/** 由「返回」键置位：下一次路由要恢复阅读位置而不是回到顶部 */
 let restoreScrollOnNextRoute = false;
+
+/**
+ * 历史条目标号。hash 路由下 popstate 对普通链接点击也会触发，不能拿它判断后退，
+ * 所以给每个历史条目打上自增序号：普通点击产生的新条目 state 为 null，
+ * 浏览器前进/后退会带着旧序号回来，据此区分。
+ */
+let navSeq = 0;
 
 /** 渲染完成后定位：需要恢复就回到上次的阅读位置，否则回到顶部 */
 function settleScroll(wantRestore) {
@@ -814,11 +830,18 @@ function shortTitle(t, max = 32) {
 async function route() {
   const path = location.hash.replace(/^#/, '') || '/';
   const parts = path.split('/').filter(Boolean);
-  const fromSlug = slugFromHash(renderedHash); // 上一页也是文章时，记为「来路」
-  const wantRestore = restoreScrollOnNextRoute; // 「返回」键 / 浏览器后退：要恢复阅读位置
+  const stateSeq = (history.state && typeof history.state.seq === 'number') ? history.state.seq : null;
+  if (stateSeq === null) history.replaceState({ seq: ++navSeq }, '');
+  else if (stateSeq > navSeq) navSeq = stateSeq;
+
+  const wantRestore = stateSeq !== null || restoreScrollOnNextRoute; // 历史移动 / 点了「返回」
   restoreScrollOnNextRoute = false;
   if (renderedHash) scrollPositions.set(renderedHash, window.scrollY); // 记住离开时的位置
-  renderedHash = location.hash;
+  const curHash = location.hash;
+  // 只在向前导航时更新「进入路线」；返回时不覆盖，保证返回键稳定指向上级
+  if (!wantRestore && renderedHash) entryFrom.set(curHash, renderedHash);
+  const backHash = entryFrom.get(curHash) || '';
+  renderedHash = curHash;
   if (!wantRestore) scrollTop();
   document.title = `${SITE.name} · 个人主页与技术博客`;
 
@@ -832,7 +855,7 @@ async function route() {
     const slug = normalizeSlug(cut === -1 ? rest : rest.slice(0, cut));
     if (slug) {
       setActiveNav('blog');
-      await viewPost(slug, fromSlug === slug ? '' : fromSlug); // 同一篇不算来路
+      await viewPost(slug, backHash);
       // 带 #小节 的深链优先滚到那一节，否则按「返回」恢复阅读位置
       if (cut !== -1) scrollToAnchor(rest.slice(cut + 1));
       else settleScroll(wantRestore);
@@ -849,8 +872,8 @@ function scrollTop() {
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 window.addEventListener('hashchange', route);
-// 浏览器前进/后退也按「返回」处理，恢复上一篇的阅读位置
-window.addEventListener('popstate', () => { restoreScrollOnNextRoute = true; });
+// 注意：hash 路由下 popstate 连普通链接点击也会触发，不能拿它判断「后退」，
+// 前进/后退的识别改由 route() 里的 history.state 序号完成。
 route();
 
 /* ------------------------------ 页脚 ------------------------------ */
