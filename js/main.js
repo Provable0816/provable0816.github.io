@@ -349,6 +349,9 @@ document.addEventListener('click', (e) => {
   // 「跳到正文」（#app）：改为直接聚焦，避免 #app 被路由当成页面地址
   if (a.classList.contains('skip-link')) { e.preventDefault(); $app.focus(); return; }
 
+  // 「← 返回」：放行 hash 变化，只置标志，让路由回来后恢复上一篇的阅读位置
+  if (a.classList.contains('back-link')) { restoreScrollOnNextRoute = true; return; }
+
   const href = a.getAttribute('href') || '';
   if (!a.closest('.prose') || !href.startsWith('#') || href.startsWith('#/')) return;
   e.preventDefault();
@@ -779,6 +782,29 @@ function slugFromHash(hash) {
 /** slug → 标题：渲染过的文章标题，「返回上一篇」用它显示来路文章名 */
 const postTitles = new Map();
 
+/** 路由 → 离开时的滚动位置：「返回上一篇」时用它恢复阅读位置 */
+const scrollPositions = new Map();
+
+/** 由「返回」键 / 浏览器后退置位：下一次路由要恢复阅读位置而不是回到顶部 */
+let restoreScrollOnNextRoute = false;
+
+/** 渲染完成后定位：需要恢复就回到上次的阅读位置，否则回到顶部 */
+function settleScroll(wantRestore) {
+  const y = wantRestore ? (scrollPositions.get(renderedHash) || 0) : 0;
+  if (y > 0) {
+    window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+    // 内容高度可能还没稳定（字体、图片），下一帧再校正一次
+    requestAnimationFrame(() => {
+      if (document.documentElement.scrollHeight >= y + window.innerHeight - 4 &&
+          Math.abs(window.scrollY - y) > 4) {
+        window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+      }
+    });
+    return;
+  }
+  scrollTop();
+}
+
 /** 截短标题，免得「← 返回 xxx」把首行撑得太长 */
 function shortTitle(t, max = 32) {
   const s = String(t || '').trim();
@@ -789,13 +815,16 @@ async function route() {
   const path = location.hash.replace(/^#/, '') || '/';
   const parts = path.split('/').filter(Boolean);
   const fromSlug = slugFromHash(renderedHash); // 上一页也是文章时，记为「来路」
+  const wantRestore = restoreScrollOnNextRoute; // 「返回」键 / 浏览器后退：要恢复阅读位置
+  restoreScrollOnNextRoute = false;
+  if (renderedHash) scrollPositions.set(renderedHash, window.scrollY); // 记住离开时的位置
   renderedHash = location.hash;
-  scrollTop();
+  if (!wantRestore) scrollTop();
   document.title = `${SITE.name} · 个人主页与技术博客`;
 
-  if (parts.length === 0) { setActiveNav('home'); await viewHome(); scrollTop(); return; }
-  if (parts[0] === 'blog') { setActiveNav('blog'); await viewBlog(); scrollTop(); return; }
-  if (parts[0] === 'about') { setActiveNav('about'); await viewAbout(); scrollTop(); return; }
+  if (parts.length === 0) { setActiveNav('home'); await viewHome(); settleScroll(wantRestore); return; }
+  if (parts[0] === 'blog') { setActiveNav('blog'); await viewBlog(); settleScroll(wantRestore); return; }
+  if (parts[0] === 'about') { setActiveNav('about'); await viewAbout(); settleScroll(wantRestore); return; }
   if (parts[0] === 'post' && parts.length > 1) {
     // slug 可以带子目录（#/post/子目录/文件），末尾还可以带 #小节
     const rest = parts.slice(1).join('/');
@@ -804,8 +833,9 @@ async function route() {
     if (slug) {
       setActiveNav('blog');
       await viewPost(slug, fromSlug === slug ? '' : fromSlug); // 同一篇不算来路
-      scrollTop();
+      // 带 #小节 的深链优先滚到那一节，否则按「返回」恢复阅读位置
       if (cut !== -1) scrollToAnchor(rest.slice(cut + 1));
+      else settleScroll(wantRestore);
       return;
     }
   }
@@ -819,6 +849,8 @@ function scrollTop() {
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 window.addEventListener('hashchange', route);
+// 浏览器前进/后退也按「返回」处理，恢复上一篇的阅读位置
+window.addEventListener('popstate', () => { restoreScrollOnNextRoute = true; });
 route();
 
 /* ------------------------------ 页脚 ------------------------------ */
