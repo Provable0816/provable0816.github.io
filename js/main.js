@@ -229,10 +229,112 @@ function enhanceContent(container) {
       el.textContent = err.message || String(err);
     }
   });
+  rewriteDocLinks(container);
   container.querySelectorAll('a[href^="http"]').forEach((a) => {
     try { if (new URL(a.href).host !== location.host) { a.target = '_blank'; a.rel = 'noopener noreferrer'; } } catch (_) { /* ignore */ }
   });
 }
+
+/* ------------------------------ 文档互链 ------------------------------
+   写文章时可以直接用相对路径引用 posts/ 里的另一个 .md 文件：
+
+     [配套深读](逐篇第一性原理深读与批判性评估.md)
+     [某一节](另一个文件.md#小节标题)
+
+   被引用的文件**不需要**登记进 posts/index.json，因此不会出现在文章列表、
+   首页「最新文章」和上一篇/下一篇里；链接会在渲染后被改写成站内路由
+   #/post/<slug>，点击即在本站渲染该文件，而不是跳到原始的 .md 文本。
+   另外，正文里形如 [x](#小节标题) 的站内锚点也在这里接管 —— 如果交给浏览器
+   默认行为，它会顶掉 hash 路由，被误判成一篇文章而显示 404。
+   ---------------------------------------------------------------------- */
+
+const POST_DIR = 'posts/';
+const MD_LINK_RE = /\.md$/i;
+
+/** 把指向 posts/*.md 的链接换算成站内路由；返回 null 表示无需改写 */
+function docLinkToRoute(rawHref) {
+  let h = String(rawHref || '').trim();
+  if (!h || h.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(h)) return null; // 锚点 / 绝对 URL / mailto
+
+  let frag = '';
+  const cut = h.indexOf('#');
+  if (cut !== -1) { frag = h.slice(cut + 1); h = h.slice(0, cut); }
+  h = h.split('?')[0];
+  if (!MD_LINK_RE.test(h)) return null; // 只接管 .md，图片/PDF 等原样保留
+
+  h = h.replace(/^\.\//, '').replace(/^\/+/, '');
+  const at = h.lastIndexOf(POST_DIR);
+  if (at !== -1) h = h.slice(at + POST_DIR.length);
+  else if (h.includes('/')) h = h.slice(h.lastIndexOf('/') + 1);
+
+  let slug = h.replace(MD_LINK_RE, '');
+  try { slug = decodeURIComponent(slug); } catch (_) { /* 保留原样 */ }
+  if (!slug) return null;
+  return '#/post/' + encodeURIComponent(slug) + (frag ? '#' + frag : '');
+}
+
+function rewriteDocLinks(container) {
+  container.querySelectorAll('a[href]').forEach((a) => {
+    const routeHref = docLinkToRoute(a.getAttribute('href'));
+    if (routeHref) a.setAttribute('href', routeHref);
+  });
+}
+
+/** 宽松归一：只留字母/数字/汉字，忽略空格、全角空格、标点、连字符 */
+function looseKey(text) {
+  return String(text).trim().toLowerCase().replace(/[^\w\u3400-\u4dbf\u4e00-\u9fff]/g, '');
+}
+
+/** 解析 #片段：先按 id 命中，再按标题文本匹配（兼容手写的目录链接） */
+function resolveAnchor(frag) {
+  if (!frag) return null;
+  let key = frag;
+  try { key = decodeURIComponent(frag); } catch (_) { /* ignore */ }
+
+  const scope = document.getElementById('prose') || document;
+  const direct = document.getElementById(key);
+  if (direct && scope.contains(direct)) return direct;
+
+  const want = slugifyHeading(key);
+  const loose = looseKey(key);
+  if (!want && !loose) return null;
+  const nodes = [...scope.querySelectorAll('[id], h1, h2, h3, h4, h5, h6')];
+  for (const el of nodes) {
+    if (el.id && (slugifyHeading(el.id) === want || (loose && looseKey(el.id) === loose))) return el;
+  }
+  for (const el of nodes) {
+    if (!/^H[1-6]$/.test(el.tagName)) continue;
+    if (slugifyHeading(el.textContent) === want) return el;
+    if (loose && looseKey(el.textContent) === loose) return el;
+  }
+  return null;
+}
+
+/** 滚动到锚点：标题上已有 scroll-margin-top，正好让开顶部固定导航 */
+function scrollToAnchor(frag) {
+  const el = resolveAnchor(frag);
+  if (!el) return false;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  return true;
+}
+
+document.addEventListener('click', (e) => {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
+  if (!a) return;
+
+  // 「跳到正文」（#app）：改为直接聚焦，避免 #app 被路由当成页面地址
+  if (a.classList.contains('skip-link')) { e.preventDefault(); $app.focus(); return; }
+
+  const href = a.getAttribute('href') || '';
+  if (!a.closest('.prose') || !href.startsWith('#') || href.startsWith('#/')) return;
+  e.preventDefault();
+  if (!scrollToAnchor(href.slice(1))) return;
+
+  // 顺手把地址栏更新成可分享的深链 #/post/<slug>#<片段>
+  const seg = location.hash.slice(1).split('#');
+  if (/^\/post\//.test(seg[0])) history.replaceState(null, '', '#' + seg[0] + href);
+});
 
 /* ------------------------------ Frontmatter ------------------------------ */
 
@@ -533,7 +635,8 @@ async function viewPost(slug) {
     md = await res.text();
   } catch (_) {
     body.innerHTML = `<div class="error-box"><h2>404 · 找不到这篇文章</h2>
-      <p>检查 <code>posts/${escapeHtml(slug)}.md</code> 是否存在，文件名要与 <code>index.json</code> 里的 <code>slug</code> 一致。</p>
+      <p>检查 <code>posts/${escapeHtml(slug)}.md</code> 是否存在、是否已随仓库上传，
+      文件名要与 <code>index.json</code> 里的 <code>slug</code> 或正文里引用的 <code>.md</code> 链接一致。</p>
       <p><a href="#/blog">← 回到文章列表</a></p></div>`;
     return;
   }
@@ -633,7 +736,17 @@ async function route() {
   if (parts.length === 0) { setActiveNav('home'); await viewHome(); scrollTop(); return; }
   if (parts[0] === 'blog') { setActiveNav('blog'); await viewBlog(); scrollTop(); return; }
   if (parts[0] === 'about') { setActiveNav('about'); await viewAbout(); scrollTop(); return; }
-  if (parts[0] === 'post' && parts[1]) { setActiveNav('blog'); await viewPost(decodeURIComponent(parts[1])); scrollTop(); return; }
+  if (parts[0] === 'post' && parts[1]) {
+    setActiveNav('blog');
+    // 支持深链 #/post/<slug>#<片段>：先渲染文章，再滚到指定小节
+    const [slugPart, ...fragParts] = parts[1].split('#');
+    let slug = slugPart;
+    try { slug = decodeURIComponent(slugPart); } catch (_) { /* 保留原样 */ }
+    await viewPost(slug);
+    scrollTop();
+    if (fragParts.length) scrollToAnchor(fragParts.join('#'));
+    return;
+  }
   setActiveNav(''); view404();
 }
 
