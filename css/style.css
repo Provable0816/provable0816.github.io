@@ -438,6 +438,13 @@ a:hover { color: var(--accent-strong); text-decoration: underline; text-underlin
 
 .prose input[type="checkbox"] { accent-color: var(--accent); margin-right: 0.45em; }
 
+/* 上传的 HTML 文档（沙箱 iframe）：给白底，免得深色主题下它自己的深色文字看不清 */
+.prose .html-doc {
+  display: block; width: 100%; margin: 1.2em 0 0;
+  min-height: 26rem; border: 1px solid var(--line); border-radius: var(--radius);
+  background: #fff;
+}
+
 /* KaTeX 数学公式 */
 .math-inline { white-space: normal; }
 .math-block {

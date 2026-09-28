@@ -259,6 +259,7 @@ function enhanceContent(container) {
 
 const POST_DIR = 'posts/';
 const MD_LINK_RE = /\.md$/i;
+const DOC_LINK_RE = /\.(md|html)$/i; // 站内文档：.md 与上传的 .html
 
 /** decodeURIComponent，遇到坏编码就原样返回 */
 function dec(s) {
@@ -274,7 +275,7 @@ function docLinkToRoute(rawHref) {
   const cut = h.indexOf('#');
   if (cut !== -1) { frag = h.slice(cut + 1); h = h.slice(0, cut); }
   h = h.split('?')[0];
-  if (!MD_LINK_RE.test(h)) return null; // 只接管 .md，图片/PDF 等原样保留
+  if (!DOC_LINK_RE.test(h)) return null; // 只接管 .md / .html，图片、PDF 等原样保留
 
   h = h.replace(/^\.\//, '').replace(/^\/+/, '');
   const at = h.lastIndexOf(POST_DIR);
@@ -289,6 +290,7 @@ function docLinkToRoute(rawHref) {
     segs.push(seg);
   }
   if (!segs.length) return null;
+  // .md 去掉扩展名（既有链接与路由保持不变）；.html 保留扩展名，取文时才分得清
   segs[segs.length - 1] = segs[segs.length - 1].replace(MD_LINK_RE, '');
   if (!segs[segs.length - 1]) return null;
 
@@ -654,6 +656,75 @@ window.addEventListener('scroll', () => {
   tocRaf = requestAnimationFrame(() => { tocRaf = 0; updateTocActive(); });
 }, { passive: true });
 
+/* ------------------------------ HTML 文档 ------------------------------ */
+
+/** 从上传的 HTML 文档里取 <title> */
+function htmlTitle(html) {
+  const m = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html);
+  return m ? m[1].replace(/\s+/g, ' ').trim() : '';
+}
+
+/** 粗略去掉标签、脚本与样式，用于估算 HTML 文档的阅读时长 */
+function htmlToText(html) {
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ');
+}
+
+/** 取文档内容：slug 不带扩展名时先按 .md 找、再退到 .html */
+async function fetchDoc(slug) {
+  const base = 'posts/' + slug.split('/').map(encodeURIComponent).join('/');
+  const urls = DOC_LINK_RE.test(slug) ? [base] : [base + '.md', base + '.html'];
+  for (const url of urls) {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) return { url, text: await res.text(), html: /\.html$/i.test(url) };
+  }
+  throw new Error('404 ' + base);
+}
+
+let htmlDocFit = null;
+
+/**
+ * 上传的 HTML 文档用沙箱 iframe 原样呈现。导出的整份文档常自带 <style>、
+ * 甚至 CDN 上的 Tailwind 之类（靠脚本生成样式），直接注入正文会重绘整个站点，
+ * 放在沙箱里则它自己的样式与脚本只作用于它自己，本站排版不受影响。
+ */
+function mountHtmlDoc(container, doc) {
+  if (htmlDocFit) { window.removeEventListener('resize', htmlDocFit); htmlDocFit = null; }
+
+  const frame = document.createElement('iframe');
+  frame.className = 'html-doc';
+  frame.title = htmlTitle(doc.text) || 'HTML 文档';
+  // 需要 allow-same-origin 才能读它内部高度做自适应（上传的是自己的文档，这里不把它当安全边界，
+  // 沙箱的作用是隔离样式与脚本，顺带禁止它跳转或替换本站页面）
+  frame.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms allow-modals');
+  frame.setAttribute('referrerpolicy', 'no-referrer');
+  frame.srcdoc = doc.text;
+  container.appendChild(frame);
+
+  // 高度随内容自适应，否则 iframe 会用自己的滚动条
+  const fit = () => {
+    if (!document.body.contains(frame)) {
+      if (htmlDocFit === fit) { window.removeEventListener('resize', fit); htmlDocFit = null; }
+      return false;
+    }
+    try {
+      const d = frame.contentDocument;
+      if (!d) return false;
+      const h = Math.max(d.documentElement.scrollHeight, d.body ? d.body.scrollHeight : 0);
+      if (h > 40) frame.style.height = h + 2 + 'px';
+      return true;
+    } catch (_) { return false; } // 读不到就保持现有高度
+  };
+  htmlDocFit = fit;
+  window.addEventListener('resize', fit);
+  frame.addEventListener('load', fit);
+  // 布局可能要等 CDN 样式/脚本跑完才稳定，短时间内多量几次
+  let ticks = 0;
+  const timer = setInterval(() => { if (!fit() || ++ticks > 14) clearInterval(timer); }, 300);
+}
+
 /* ------------------------------ 文章页 ------------------------------ */
 
 async function viewPost(slug, backHash = '') {
@@ -678,25 +749,24 @@ async function viewPost(slug, backHash = '') {
   let listMeta = null;
   try { listMeta = (await getManifest()).find((p) => p.slug === slug) || null; } catch (_) { /* 单篇不依赖清单也能读 */ }
 
-  let md;
+  let doc;
   try {
-    const res = await fetch('posts/' + slug.split('/').map(encodeURIComponent).join('/') + '.md', { cache: 'no-store' });
-    if (!res.ok) throw new Error('post ' + res.status);
-    md = await res.text();
+    doc = await fetchDoc(slug);
   } catch (_) {
     body.innerHTML = `<div class="error-box"><h2>404 · 找不到这篇文章</h2>
-      <p>检查 <code>posts/${escapeHtml(slug)}.md</code> 是否存在、是否已随仓库上传，
-      文件名要与 <code>index.json</code> 里的 <code>slug</code> 或正文里引用的 <code>.md</code> 链接一致。</p>
+      <p>检查 <code>posts/${escapeHtml(slug)}.md</code> 或 <code>posts/${escapeHtml(slug)}.html</code> 是否存在、
+      是否已随仓库上传，文件名要与 <code>index.json</code> 里的 <code>slug</code> 或正文里引用的链接一致。</p>
       <p><a href="#/blog">← 回到文章列表</a></p></div>`;
     return;
   }
 
-  const { meta: fm, body: content } = parseFrontmatter(md);
-  const title = fm.title || (listMeta && listMeta.title) || firstHeading(content) || slug;
+  const { meta: fm, body: content } = parseFrontmatter(doc.html ? '' : doc.text);
+  const title = fm.title || (listMeta && listMeta.title)
+    || (doc.html ? htmlTitle(doc.text) : firstHeading(content)) || slug;
   postTitles.set(slug, title); // 供子文档页的「返回上一篇」显示来路文章名
   const date = fm.date || (listMeta && listMeta.date) || '';
   const tags = fm.tags ? normalizeTags(fm.tags) : ((listMeta && listMeta.tags) || []);
-  const minutes = readingTime(content);
+  const minutes = readingTime(doc.html ? htmlToText(doc.text) : content);
 
   document.title = `${title} · ${SITE.name}`;
 
@@ -725,11 +795,18 @@ async function viewPost(slug, backHash = '') {
       </div>
       ${tagsHtml(tags)}
     </header>
-    <article class="prose" id="prose">${renderMarkdown(content)}</article>
+    <article class="prose" id="prose">${doc.html ? '' : renderMarkdown(content)}</article>
     ${nav}`;
 
-  enhanceContent(document.getElementById('prose'));
-  mountToc(document.getElementById('prose'), document.getElementById('post-toc'));
+  const prose = document.getElementById('prose');
+  if (doc.html) {
+    prose.innerHTML = `<p class="mono-dim">HTML 文档，样式与脚本在沙箱里隔离呈现 ·
+      <a href="${escapeHtml(doc.url)}" target="_blank" rel="noopener">在新窗口打开原始文件 ↗</a></p>`;
+    mountHtmlDoc(prose, doc);
+  } else {
+    enhanceContent(prose);
+    mountToc(prose, document.getElementById('post-toc'));
+  }
 }
 
 /* ------------------------------ 关于页 ------------------------------ */
