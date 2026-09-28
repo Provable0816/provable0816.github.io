@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航空视景系统需求分析对比</title>
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #2d3748;
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px 0 rgba(31, 38, 135, 0.2);
+        }
+        .highlight-text {
+            position: relative;
+            display: inline-block;
+        }
+        .highlight-text::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background-color: rgba(79, 70, 229, 0.2);
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航条 -->
+    <nav class="glassmorphism sticky top-0 z-50 p-4 mb-8">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+                <i class="fas fa-plane mr-2"></i>航空视景系统对比分析
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区 -->
+    <div class="container mx-auto py-8 px-4">
+        <div class="glassmorphism p-8 mb-8">
+            <h1 class="text-3xl font-bold mb-6 text-center">
+                <span class="highlight-text">航空视景系统需求分析对比</span>
+            </h1>
+            <p class="text-gray-600 text-center mb-8">增强视景(EVS)、合成视景(SVS)与组合视景(CVS)系统标准对比</p>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                    <thead class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+                        <tr>
+                            <th class="py-3 px-4 text-left">条目名称</th>
+                            <th class="py-3 px-4 text-left">增强视景要求(EVS)</th>
+                            <th class="py-3 px-4 text-left">合成视景要求(SVS)</th>
+                            <th class="py-3 px-4 text-left">组合视景要求(CVS)</th>
+                            <th class="py-3 px-4 text-left">差异说明</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="py-4 px-4 font-medium">细分条目</td>
+                            <td class="py-4 px-4">增强视景(EVS)</td>
+                            <td class="py-4 px-4">合成视景(SVS)</td>
+                            <td class="py-4 px-4">组合视景(CVS)</td>
+                            <td class="py-4 px-4">
+                                <div class="flex flex-col space-y-1">
+                                    <span class="text-sm">一致性：无</span>
+                                    <span class="text-sm">差异性：各系统要求可能不同</span>
+                                    <span class="text-sm">特殊说明：无</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glassmorphism p-6 card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                        <i class="fas fa-binoculars"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">增强视景(EVS)</h3>
+                </div>
+                <p class="text-gray-600">通过红外或毫米波雷达等传感器增强飞行员在低能见度条件下的视觉能力，提供真实环境的增强图像。</p>
+            </div>
+
+            <div class="glassmorphism p-6 card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-3">
+                        <i class="fas fa-map"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">合成视景(SVS)</h3>
+                </div>
+                <p class="text-gray-600">基于地形数据库和飞机位置信息生成的虚拟三维环境视图，不依赖外部传感器数据。</p>
+            </div>
+
+            <div class="glassmorphism p-6 card-hover">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">组合视景(CVS)</h3>
+                </div>
+                <p class="text-gray-600">将增强视景和合成视景融合在一起的综合显示系统，结合两者的优势提供更全面的环境感知。</p>
+            </div>
+        </div>
+
+        <div class="glassmorphism p-8">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white mr-3">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                系统对比说明
+            </h2>
+            <div class="space-y-4">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-blue-800"><span class="font-medium">一致性：</span>三种视景系统在基本功能上无一致性要求，各自有独立的技术标准。</p>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-lg">
+                    <p class="text-purple-800"><span class="font-medium">差异性：</span>各系统在传感器需求、数据处理、显示方式等方面存在显著差异。</p>
+                </div>
+                <div class="p-4 bg-indigo-50 rounded-lg">
+                    <p class="text-indigo-800"><span class="font-medium">特殊说明：</span>目前暂无特殊说明要求，但组合视景系统需要特别注意两种技术的融合方式。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-100 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>created by <a href="https://space.coze.cn" class="text-blue-600 hover:underline">coze space</a></p>
+            <p class="mt-2">页面内容均由 AI 生成，仅供参考</p>
+        </div>
+    </footer>
+
+    <script>
+        // 添加简单的交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 表格行悬停效果
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = 'rgba(79, 70, 229, 0.05)';
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+
+            // 卡片悬停动画
+            const cards = document.querySelectorAll('.card-hover');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
