@@ -43,6 +43,7 @@ document.getElementById('theme-toggle').addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
   localStorage.setItem('theme', next);
+  syncGiscusTheme(); // 评论区跟着换配色
 });
 
 /* ------------------------------ 页头滚动效果 ------------------------------ */
@@ -764,7 +765,6 @@ async function viewPost(slug, backHash = '') {
   const title = fm.title || (listMeta && listMeta.title)
     || (doc.html ? htmlTitle(doc.text) : firstHeading(content)) || slug;
   postTitles.set(slug, title); // 供子文档页的「返回上一篇」显示来路文章名
-  setNotesContext(slug, title); // 随手记按文章分别记录
   const date = fm.date || (listMeta && listMeta.date) || '';
   const tags = fm.tags ? normalizeTags(fm.tags) : ((listMeta && listMeta.tags) || []);
   const minutes = readingTime(doc.html ? htmlToText(doc.text) : content);
@@ -786,6 +786,17 @@ async function viewPost(slug, backHash = '') {
     }
   } catch (_) { /* ignore */ }
 
+  // 讨论区只挂在登记进 index.json 的文章上：子文档（Agent记忆papers/ 里那 200 多篇）
+  // 不挂，免得每被打开一次就在 Discussions 里新建一个讨论。
+  const commentsHtml = listMeta ? `
+    <section class="comments" id="comments">
+      <div class="comments-head">
+        <p class="section-kicker">DISCUSSION</p>
+        <h2 class="comments-title">讨论</h2>
+      </div>
+      <div class="giscus" id="giscus"></div>
+    </section>` : '';
+
   body.innerHTML = `
     <header class="post-header">
       <p class="section-kicker">POST</p>
@@ -797,6 +808,7 @@ async function viewPost(slug, backHash = '') {
       ${tagsHtml(tags)}
     </header>
     <article class="prose" id="prose">${doc.html ? '' : renderMarkdown(content)}</article>
+    ${commentsHtml}
     ${nav}`;
 
   const prose = document.getElementById('prose');
@@ -808,6 +820,7 @@ async function viewPost(slug, backHash = '') {
     enhanceContent(prose);
     mountToc(prose, document.getElementById('post-toc'));
   }
+  if (commentsHtml) mountComments(document.getElementById('giscus'), slug);
 }
 
 /* ------------------------------ 关于页 ------------------------------ */
@@ -845,172 +858,78 @@ function view404() {
     </div>
   </div>`;
 }
-
-/* ------------------------------ 随手记（本地笔记） ------------------------------
-   阅读时随手记想法/问题。纯静态站点没有后端，所以笔记存在浏览器本地（localStorage），
-   按文章 slug 分开存，不上传也不公开。换设备或清空站点数据会丢，面板底部提供
-   「导出全部笔记」，可以把它们存成 markdown 留档。
+/* ------------------------------ 讨论区（giscus） ------------------------------
+   评论存在仓库的 GitHub Discussions 里，由 giscus 渲染（前置条件：给仓库装上 giscus 应用）。
+   站内路由跑在 hash 上，所有文章的 URL 路径都一样，所以用 mapping=specific +
+   term=文章 slug 来区分——否则全站评论会挤进同一个讨论。
+   换仓库 / 换分类只改下面这几个常量即可。
    ------------------------------------------------------------------------------ */
 
-const NOTES_KEY = 'blog-notes:v1';
+const GISCUS = {
+  repo: "Provable0816/provable0816.github.io",
+  repoId: "R_kgDOSAcryw",
+  category: "Announcements",
+  categoryId: "DIC_kwDOSAcry84DGuqL",
+  lang: "zh-CN",
+};
 
-let notesData = { posts: {}, drafts: {} };
-let notesSlug = ''; // 当前文章 slug；空串表示不在文章页
+let giscusObserver = null;
 
-const notesToggle = document.getElementById('notes-toggle');
-const notesPanel = document.getElementById('notes-panel');
-const notesCount = document.getElementById('notes-count');
-const notesTitleEl = document.getElementById('notes-title');
-const notesInput = document.getElementById('notes-input');
-const notesList = document.getElementById('notes-list');
-const notesHint = document.getElementById('notes-hint');
-const notesScope = document.getElementById('notes-scope');
-const notesExport = document.getElementById('notes-export');
-
-function loadNotes() {
-  try {
-    const data = JSON.parse(localStorage.getItem(NOTES_KEY) || 'null');
-    notesData = (data && typeof data === 'object' && data.posts) ? data : { posts: {}, drafts: {} };
-    if (!notesData.drafts) notesData.drafts = {};
-  } catch (_) { notesData = { posts: {}, drafts: {} }; }
+function giscusTheme() {
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
-function persistNotes() {
-  try { localStorage.setItem(NOTES_KEY, JSON.stringify(notesData)); } catch (_) { /* 隐私模式等：静默失败 */ }
+/** 主题切换时同步评论区（giscus 支持用 postMessage 改配置） */
+function syncGiscusTheme() {
+  const frame = document.querySelector("iframe.giscus-frame");
+  if (frame) frame.contentWindow.postMessage({ giscus: { setConfig: { theme: giscusTheme() } } }, "https://giscus.app");
 }
 
-function storageAvailable() {
-  try { localStorage.setItem('__notes_probe', '1'); localStorage.removeItem('__notes_probe'); return true; } catch (_) { return false; }
-}
+/** 在文章末尾挂评论区；term 用 slug，保证每篇一个独立讨论 */
+function mountComments(host, slug) {
+  if (!host) return;
+  if (giscusObserver) { giscusObserver.disconnect(); giscusObserver = null; }
+  const old = document.getElementById("giscus-script");
+  if (old) old.remove(); // 换文章要重新初始化，旧的留着会重复渲染
+  host.innerHTML = "";
 
-function notesOf(slug) {
-  const list = notesData.posts[slug];
-  return Array.isArray(list) ? list : [];
-}
+  const load = () => {
+    // giscus 初始化后会自己删掉 <script>，所以判断是否已加载要看 iframe 在不在
+    if (!document.body.contains(host) || host.querySelector('iframe.giscus-frame')) return;
+    const s = document.createElement("script");
+    s.id = "giscus-script";
+    s.src = "https://giscus.app/client.js";
+    s.async = true;
+    s.crossOrigin = "anonymous";
+    const attrs = {
+      "data-repo": GISCUS.repo,
+      "data-repo-id": GISCUS.repoId,
+      "data-category": GISCUS.category,
+      "data-category-id": GISCUS.categoryId,
+      "data-mapping": "specific",
+      "data-term": slug,
+      "data-strict": "1",
+      "data-reactions-enabled": "1",
+      "data-emit-metadata": "0",
+      "data-input-position": "top",
+      "data-theme": giscusTheme(),
+      "data-lang": GISCUS.lang,
+      "data-loading": "lazy",
+    };
+    for (const k in attrs) s.setAttribute(k, attrs[k]);
+    host.appendChild(s);
+  };
 
-function fmtNoteTime(ts) {
-  const d = new Date(ts);
-  const p = (n) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
-}
-
-function renderNotes() {
-  if (!notesSlug) return;
-  const list = notesOf(notesSlug);
-  notesCount.textContent = String(list.length);
-  notesCount.hidden = list.length === 0;
-  notesList.innerHTML = list.length
-    ? list.map((n) => `<li class="note-item">
-        <p class="note-text">${escapeHtml(n.text)}</p>
-        <p class="note-meta"><span>${fmtNoteTime(n.at)}</span>
-          <button class="note-del" type="button" data-del="${escapeHtml(n.id)}">删除</button></p>
-      </li>`).join('')
-    : '<li class="note-empty">本篇还没有笔记</li>';
-}
-
-/** 路由切换时调用；slug 为空表示离开文章页（隐藏按钮并收起面板） */
-function setNotesContext(slug, title) {
-  notesSlug = slug || '';
-  notesToggle.hidden = !notesSlug;
-  if (!notesSlug) { closeNotes(); return; }
-  notesTitleEl.textContent = title || slug;
-  notesInput.value = notesData.drafts[notesSlug] || '';
-  notesHint.textContent = '';
-  renderNotes();
-}
-
-function openNotes() {
-  notesPanel.classList.add('open');
-  notesToggle.classList.add('active');
-  notesToggle.setAttribute('aria-expanded', 'true');
-  notesInput.focus();
-}
-
-function closeNotes() {
-  notesPanel.classList.remove('open');
-  notesToggle.classList.remove('active');
-  notesToggle.setAttribute('aria-expanded', 'false');
-}
-
-function addNote() {
-  if (!notesSlug) return;
-  const text = notesInput.value.trim();
-  if (!text) { notesHint.textContent = '先写点什么吧'; return; }
-  const list = notesOf(notesSlug).slice();
-  list.unshift({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), text, at: Date.now() });
-  notesData.posts[notesSlug] = list;
-  delete notesData.drafts[notesSlug];
-  persistNotes();
-  notesInput.value = '';
-  notesHint.textContent = '已保存';
-  renderNotes();
-  setTimeout(() => { if (notesHint.textContent === '已保存') notesHint.textContent = ''; }, 1800);
-}
-
-/** 导出全部笔记为 markdown（笔记只在本机，导出一份更保险） */
-function exportNotes() {
-  const slugs = Object.keys(notesData.posts).filter((s) => notesOf(s).length).sort();
-  if (!slugs.length) { notesHint.textContent = '还没有任何笔记'; return; }
-  const lines = ['# 博客笔记', '', `导出时间：${fmtNoteTime(Date.now())}`, ''];
-  for (const s of slugs) {
-    lines.push(`## ${postTitles.get(s) || s}`, '', `> slug: \`${s}\``, '');
-    for (const n of notesOf(s)) lines.push(`- **${fmtNoteTime(n.at)}** ${n.text.replace(/\n+/g, ' ')}`);
-    lines.push('');
+  // 滚到评论区附近再加载，避免每打开一篇文章都去请求第三方脚本
+  if ("IntersectionObserver" in window) {
+    giscusObserver = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { giscusObserver.disconnect(); giscusObserver = null; load(); }
+    }, { rootMargin: "400px 0px" });
+    giscusObserver.observe(host);
+  } else {
+    load();
   }
-  const url = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' }));
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `博客笔记-${new Date().toISOString().slice(0, 10)}.md`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 4000);
-  notesHint.textContent = '已导出';
 }
-
-loadNotes();
-if (!storageAvailable()) notesScope.textContent = '当前浏览器无法保存笔记';
-
-notesToggle.addEventListener('click', () => {
-  if (notesPanel.classList.contains('open')) closeNotes(); else openNotes();
-});
-document.getElementById('notes-close').addEventListener('click', closeNotes);
-document.getElementById('notes-save').addEventListener('click', addNote);
-notesExport.addEventListener('click', exportNotes);
-
-notesInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); addNote(); }
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && notesPanel.classList.contains('open')) closeNotes();
-});
-
-// 输入即存草稿，切走再回来不丢
-let notesDraftTimer = 0;
-notesInput.addEventListener('input', () => {
-  if (!notesSlug) return;
-  clearTimeout(notesDraftTimer);
-  notesDraftTimer = setTimeout(() => {
-    const v = notesInput.value;
-    if (v.trim()) notesData.drafts[notesSlug] = v;
-    else delete notesData.drafts[notesSlug];
-    persistNotes();
-  }, 400);
-});
-
-notesList.addEventListener('click', (e) => {
-  const btn = e.target instanceof Element ? e.target.closest('[data-del]') : null;
-  if (!btn || !notesSlug) return;
-  if (!window.confirm('删除这条笔记？')) return;
-  notesData.posts[notesSlug] = notesOf(notesSlug).filter((n) => n.id !== btn.dataset.del);
-  persistNotes();
-  renderNotes();
-});
-
-// 同一浏览器多标签页之间同步
-window.addEventListener('storage', (e) => {
-  if (e.key !== NOTES_KEY) return;
-  loadNotes();
-  if (notesSlug) renderNotes();
-});
 
 /* ==========================================================================
    路由
@@ -1089,7 +1008,6 @@ async function route() {
 
   const wantRestore = stateSeq !== null || restoreScrollOnNextRoute; // 历史移动 / 点了「返回」
   restoreScrollOnNextRoute = false;
-  setNotesContext(''); // 离开文章页就收起随手记；文章页会在 viewPost 里重新设定
   if (renderedHash) scrollPositions.set(renderedHash, window.scrollY); // 记住离开时的位置
   const curHash = location.hash;
   // 只在向前导航时更新「进入路线」；返回时不覆盖，保证返回键稳定指向上级

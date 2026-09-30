@@ -91,17 +91,30 @@
 两点差异要知道：HTML 文档**没有左侧目录**（目录只对 markdown 正文生效）；页面标题会取
 `index.json` 里的 `title`，没有登记时取文档自己的 `<title>`。
 
-## 随手记（本地笔记）
+## 讨论区（giscus · 评论存在 GitHub Discussions）
 
-读文章时点右下角的「笔记」按钮，可以随手记想法或问题：**按文章分开存**、`Ctrl / ⌘ + Enter`
-保存、`Esc` 关闭；没保存的内容会留作草稿，切走再回来还在。按钮上的角标显示本篇有几条。
+每篇文章末尾（上一篇/下一篇之前）会挂一个 giscus 评论区，评论直接存在本仓库的
+**Discussions** 里，读者用 GitHub 账号登录后即可发言。
 
-笔记存在**浏览器本地**（`localStorage`，键名 `blog-notes:v1`），不上传、不公开，
-因此换设备或换浏览器看不到、清除站点数据就会丢——面板底部的「导出全部笔记」可以把它们
-存成一份 markdown 留档（含每篇标题、slug 与时间）。
+**前置条件：给仓库装上 giscus 应用** —— 打开 <https://github.com/apps/giscus> 点 Install，
+选中本仓库即可（只装这一个仓库就够）。没装的话评论区会显示
+`giscus is not installed on this repository`。
 
-> 想让**读者**也能留言（公开评论区），纯静态站点需要接第三方服务（如基于 GitHub Discussions
-> 的 Giscus）。需要的话可以另加，与这套本地笔记互不冲突。
+配置集中在 `js/main.js` 顶部的 `GISCUS` 常量：
+
+| 项 | 当前值 | 说明 |
+| --- | --- | --- |
+| `repo` / `repoId` | `Provable0816/provable0816.github.io` / `R_kgDOSAcryw` | 评论存放的仓库 |
+| `category` / `categoryId` | `Announcements` / `DIC_kwDOSAcry84DGuqL` | 讨论分类，想换成 `General`、`Q&A` 等改这两项即可 |
+
+两个实现要点：
+
+- 站内路由跑在 `location.hash` 上，所有文章的 URL 路径都是 `/`，所以用
+  `data-mapping="specific"` + `data-term=<文章 slug>` 来区分——**别改已发文章的 slug，
+  也别在 GitHub 上重命名对应的讨论**，否则评论会「搬」到新讨论去。
+- 讨论区只挂在**登记进 `index.json`** 的文章上；`posts/Agent记忆papers/` 里那 200 多篇
+  子文档不挂，免得每被打开一次就在 Discussions 里新建一个讨论。要给它们也开的话，
+  把 `viewPost()` 里 `commentsHtml` 的判断条件去掉即可。
 
 ## 本地预览
 
