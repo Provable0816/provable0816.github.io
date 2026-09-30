@@ -512,8 +512,19 @@ a:hover { color: var(--accent-strong); text-decoration: underline; text-underlin
    -------------------------------------------------------------------------- */
 
 .comments { margin-top: 3.6rem; padding-top: 2.4rem; border-top: 1px solid var(--line); }
-.comments-head { margin-bottom: 1.5rem; }
+.comments-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  justify-content: space-between; gap: 0.6rem 1.2rem; margin-bottom: 1.5rem;
+}
 .comments-title { margin: 0; font-family: var(--serif); font-size: 1.35rem; letter-spacing: -0.01em; }
+
+/* 指向 GitHub 对应讨论的入口：giscus 的评论框传不了图，那里可以 */
+.comments-github {
+  padding-bottom: 0.15rem; border-bottom: 1px solid transparent;
+  font-family: var(--mono); font-size: 0.78rem; color: var(--accent);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.comments-github:hover { color: var(--accent-strong); border-bottom-color: currentColor; text-decoration: none; }
 
 /* giscus 用 iframe 渲染，先占住高度，避免加载完成后页面跳动 */
 .comments .giscus { min-height: 11rem; }

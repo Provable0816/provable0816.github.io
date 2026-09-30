@@ -791,8 +791,12 @@ async function viewPost(slug, backHash = '') {
   const commentsHtml = listMeta ? `
     <section class="comments" id="comments">
       <div class="comments-head">
-        <p class="section-kicker">DISCUSSION</p>
-        <h2 class="comments-title">讨论</h2>
+        <div>
+          <p class="section-kicker">DISCUSSION</p>
+          <h2 class="comments-title">讨论</h2>
+        </div>
+        <a class="comments-github" href="${escapeHtml(giscusDiscussionUrl(slug))}" target="_blank" rel="noopener"
+           title="giscus 的评论框不能上传图片；到 GitHub 对应的讨论里发言可以直接拖拽或粘贴上传">GitHub 上发言 · 可上传图片 ↗</a>
       </div>
       <div class="giscus" id="giscus"></div>
     </section>` : '';
@@ -877,6 +881,15 @@ let giscusObserver = null;
 
 function giscusTheme() {
   return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+}
+
+/**
+ * 当前文章那条讨论在 GitHub 上的位置。讨论标题就是 term（= slug），所以用讨论搜索直达，
+ * 而不是笼统指向 Discussions 列表。用处：giscus 的评论框不能上传图片，
+ * 但 GitHub 自己的编辑器可以直接拖拽/粘贴上传。
+ */
+function giscusDiscussionUrl(slug) {
+  return `https://github.com/${GISCUS.repo}/discussions?discussions_q=${encodeURIComponent(slug)}`;
 }
 
 /** 主题切换时同步评论区（giscus 支持用 postMessage 改配置） */

@@ -107,6 +107,11 @@
 | `repo` / `repoId` | `Provable0816/provable0816.github.io` / `R_kgDOSAcryw` | 评论存放的仓库 |
 | `category` / `categoryId` | `Announcements` / `DIC_kwDOSAcry84DGuqL` | 讨论分类，想换成 `General`、`Q&A` 等改这两项即可 |
 
+**关于图片**：giscus 的评论框**不能上传图片**（官方限制：没有上传按钮，也不支持拖拽或粘贴），
+只能贴外部图片链接。所以讨论标题旁给了一个入口「**GitHub 上发言 · 可上传图片 ↗**」，
+点它直达本篇文章对应的讨论（用讨论搜索匹配标题，讨论标题就是文章 slug）——在 GitHub
+自己的编辑器里可以直接拖拽或粘贴上传图片，发完后 giscus 会照常把图渲染出来。
+
 两个实现要点：
 
 - 站内路由跑在 `location.hash` 上，所有文章的 URL 路径都是 `/`，所以用
