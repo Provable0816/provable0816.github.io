@@ -1,8 +1,16 @@
-# 学习路线：三条 12 周路径
+# 学习路线：五条执行路径
 
-README 是**查阅型**清单，这份文件是**执行型**路线。每条路线都按「先懂原理 → 再手写 → 最后做系统」的顺序排，避免跳级。
+README 是**查阅型**清单（26 章、275 个条目），这份文件是**执行型**路线。每条路线都按「先懂原理 → 再手写 → 最后做系统」的顺序排，避免跳级。
 
-三条路线共用第 0 阶段的基础，之后分叉。
+五条路线共用第 0 阶段的基础，之后分叉：
+
+| 路线 | 周期 | 适合谁 |
+| :--- | :--- | :--- |
+| A · 计算机视觉 | 12 周 | 想做图像生成、检测、复原 |
+| B · 大语言模型 | 12 周 | 想搞懂 Transformer 到对齐的全链路 |
+| C · Agent 与检索 | 8 周 | 想搭能干活的智能体 |
+| D · 系统与性能 | 12 周 | 想搞清楚 GPU 为什么跑不满、模型怎么塞进小设备 |
+| E · 多模态与 3D | 8 周 | 想做 VLM、NeRF、Gaussian Splatting |
 
 ---
 
@@ -67,9 +75,43 @@ README 是**查阅型**清单，这份文件是**执行型**路线。每条路�
 
 ---
 
+## 路线 D：系统与性能（12 周）
+
+适合已经跑通过模型训练、想知道「为什么我的 GPU 只有 20% 利用率」的人。前提是先走完阶段 0。
+
+| 周 | 主题 | 仓库 / 材料 | 产出 |
+| :--- | :--- | :--- | :--- |
+| 1–2 | GPU 心智模型 | [srush/GPU-Puzzles](https://github.com/srush/GPU-Puzzles) | 说清 global/shared/register 的带宽差与 warp 调度 |
+| 3–4 | GEMM 优化四级 | [terryye/cuda_GEMM](https://github.com/terryye/cuda_GEMM) | 朴素 → tiling → Tensor Core → cuBLASLt，每级给出实测加速比 |
+| 5–6 | 注意力算子 | [sanket-pixel/flash-attention](https://github.com/sanket-pixel/flash-attention)、[codingwithshawnyt/FlashAttention-CUDA](https://github.com/codingwithshawnyt/FlashAttention-CUDA) | 手写 online softmax，并用 CPU 参考验证误差 |
+| 7 | 高层算子语言 | [triton-lang/triton](https://github.com/triton-lang/triton) | 用 Triton 重写 FlashAttention 并 autotune |
+| 8 | 极简框架与编译 | [tinygrad/tinygrad](https://github.com/tinygrad/tinygrad) | 说清 lazy IR、算子融合与后端如何接 |
+| 9 | 量化算术 | [Mario928/edge-ml-optimization](https://github.com/Mario928/edge-ml-optimization)、[IST-DASLab/gptq](https://github.com/IST-DASLab/gptq) | 手写 INT8 校准，测出各层 PPL 敏感度 |
+| 10 | 并行策略 | [ritwikbera/RingReduce](https://github.com/ritwikbera/RingReduce) → [huggingface/picotron](https://github.com/huggingface/picotron) | 从 AllReduce 写到 4D 并行，验证数值等价 |
+| 11 | 显存与重计算 | [topal-team/rockmate](https://github.com/topal-team/rockmate) | 在给定显存预算下自动选择检查点策略 |
+| 12 | 端侧部署 | [RightNow-AI/picolm](https://github.com/RightNow-AI/picolm) 或 [mbrukman/tinytinyTPU-co](https://github.com/mbrukman/tinytinyTPU-co) | 把模型塞进极端受限环境，或用 HDL 焊一个矩阵单元 |
+
+**验收点**：任何性能结论都必须带 baseline、误差阈值与测量工具（Nsight / event timing）。说不出「快在哪一步」的优化，等于没做。
+
+## 路线 E：多模态与 3D（8 周）
+
+| 周 | 主题 | 仓库 / 材料 | 产出 |
+| :--- | :--- | :--- | :--- |
+| 1 | 图像如何变成 token | [google-research/vision_transformer](https://github.com/google-research/vision_transformer) | 手写 patch 切分与位置编码 |
+| 2 | 图文对齐 | [openai/CLIP](https://github.com/openai/CLIP) | 实现对比损失，跑通零样本分类 |
+| 3–4 | 最小 VLM | [huggingface/nanoVLM](https://github.com/huggingface/nanoVLM) | 训一个 222M VLM，说清模态投影层在做什么 |
+| 5 | 视觉指令微调 | [haotian-liu/LLaVA](https://github.com/haotian-liu/LLaVA) | 对比 nanoVLM，理解指令数据与规模的影响 |
+| 6 | 体渲染 | [yenchenlin/nerf-pytorch](https://github.com/yenchenlin/nerf-pytorch) | 手写光线采样与体渲染积分 |
+| 7 | 坐标编码与加速 | [NVlabs/instant-ngp](https://github.com/NVlabs/instant-ngp) | 说清哈希编码为什么能替代深层 MLP |
+| 8 | 显式基元 | [graphdeco-inria/gaussian-splatting](https://github.com/graphdeco-inria/gaussian-splatting) | 对比隐式场与显式高斯的取舍 |
+
+**验收点**：多模态要能回答「视觉 token 怎么进 LLM、占多少上下文、分辨率怎么变」；3D 要能回答「隐式场 vs 显式基元在空区域计算、渲染速度、可编辑性上分别差什么」。
+
+---
+
 ## 通用建议
 
 - **每个项目都 fork 并加注释**：自己重写一遍 README，比读十遍有用。
 - **记录失败**：训练不收敛、检索召回差、Agent 死循环，这些调试过程才是真正的收获。
-- **别追求覆盖**：路线 A/B 选一条走完，胜过三条各走两周。
+- **别追求覆盖**：路线 A/B/D 选一条走完，胜过五条各走两周。路线 D 需要先走完阶段 0，路线 E 建议先有 CV 或 LLM 基础。
 - **输出倒逼输入**：每完成一个阶段，写一篇博客或录一段讲解，讲不清楚的地方就是没懂的地方。
