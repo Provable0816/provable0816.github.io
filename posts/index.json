@@ -51,14 +51,14 @@
   {
     "slug": "AI顶会免训练API方法调研报告",
     "title": "AI顶会免训练API方法调研报告",
-    "date": "2026-09-25",
+    "date": "2026-09-21",
     "tags": ["AI", "API", "调研"],
     "description": "对AI顶会中免训练API方法的调研报告。"
   },
   {
     "slug": "大模型记忆_Agent记忆压缩方法",
     "title": "大模型记忆_Agent记忆压缩方法",
-    "date": "2026-09-26",
+    "date": "2026-09-27",
     "tags": ["大模型", "记忆", "压缩"],
     "description": "探讨大模型记忆与Agent记忆压缩方法。"
   },
@@ -72,7 +72,7 @@
   {
     "slug": "从零实现AI",
     "title": "从零实现AI",
-    "date": "2026-10-01",
+    "date": "2026-10-07",
     "tags": ["xxx-from-scratch", "AI"],
     "description": "从零开始实现一个简单的AI系统。"
   }
