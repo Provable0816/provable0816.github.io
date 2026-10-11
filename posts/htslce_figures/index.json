@@ -1,0 +1,389 @@
+[
+ {
+  "kind": "figure",
+  "num": "1",
+  "page": 2,
+  "caption": "Figure 1: Highlight-Then-Summarize. H2S transforms a block-structured long document into source-addressable evidence and then a question-conditioned summary before producing the final answer in one autoregressive trajectory.",
+  "file": "figures/fig-01.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.178,
+   0.155,
+   0.819,
+   0.412
+  ],
+  "label": "fig:overview",
+  "source_files": [
+   "figs/H2S_pipeline.pdf"
+  ],
+  "tex_line": 33,
+  "refs": [
+   "§1 Introduction (L42)",
+   "§3.2 Highlight-Then-Summarize Paradigm (L147)"
+  ]
+ },
+ {
+  "kind": "figure",
+  "num": "2",
+  "page": 5,
+  "caption": "Figure 2: Composition of H2S-Dataset. H2S-Dataset spans diverse long-context tasks and input lengths, with reasoning and precise retrieval accounting for 24.4% and 23.7% of the dataset, respec- tively, while examples cover input lengths from 0–32K to 64–128K+ tokens.",
+  "file": "figures/fig-02.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.192,
+   0.07,
+   0.828,
+   0.314
+  ],
+  "label": "fig:dataset_composition",
+  "source_files": [
+   "figs/dataset_composition_by_input_tokens.pdf",
+   "figs/dataset_composition_by_task.png"
+  ],
+  "tex_line": 151,
+  "refs": []
+ },
+ {
+  "kind": "figure",
+  "num": "3",
+  "page": 6,
+  "caption": "Figure 3: Dataset Construction of Highlight-Then-Summarize. Each training instance is con- structed through semantic blocking, candidate retrieval, query-guided evidence extraction, question- conditioned summarization, and quality verification, with failed instances iteratively reconstructed until the required criteria are satisfied.",
+  "file": "figures/fig-03.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.094,
+   0.828,
+   0.377
+  ],
+  "label": "fig:data_construction",
+  "source_files": [
+   "figs/H2S_datapipeline.pdf"
+  ],
+  "tex_line": 189,
+  "refs": [
+   "§3.3 Construction of H2S-Dataset (L187)"
+  ]
+ },
+ {
+  "kind": "figure",
+  "num": "4",
+  "page": 8,
+  "caption": "Figure 4: Analysis of Summarization Quality. Final- answer score versus Evidence–Summary Quality (ESQ). Higher is better on both axes.",
+  "file": "figures/fig-04.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.424,
+   0.183,
+   0.828,
+   0.42
+  ],
+  "label": "fig:esq_training_paths",
+  "source_files": [
+   "figs/esq_qc1090_training_paths.png"
+  ],
+  "tex_line": 279,
+  "refs": [
+   "§4.3 Analysis of Summarization Quality (L296)"
+  ]
+ },
+ {
+  "kind": "figure",
+  "num": "5",
+  "page": 9,
+  "caption": "Figure 5: Attention Distribution of Long Document Analysis. H2S improves long-context localization by inducing more concentrated attention over query- relevant evidence in the source document.",
+  "file": "figures/fig-05.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.166,
+   0.088,
+   0.536,
+   0.225
+  ]
+ },
+ {
+  "kind": "figure",
+  "num": "6",
+  "page": 9,
+  "caption": "Figure 6: Output budget ablation. Aver- age score under different output budgets.",
+  "file": "figures/fig-06.png",
+  "mode": "整页",
+  "label": "fig:attention_case_study, tab:budget",
+  "source_files": [
+   "figs/attention-case-study.png"
+  ],
+  "tex_line": 355,
+  "refs": [
+   "§4.5 Attention Distribution of Long Document  (L353)",
+   "§4.4 Ablations study (L348)",
+   "§A.4 Detailed Output-Budget Results (L504)"
+  ]
+ },
+ {
+  "kind": "figure",
+  "num": "A7",
+  "page": 13,
+  "caption": "Figure A7: Benchmark and input-length distributions of the final training data. The left panel merges different task configurations from the same benchmark; LongBench-Pro contains T1–T11. The right panel shows the within-split length proportions for SFT and RL. The two splits have similar task-source and length distributions.",
+  "file": "figures/fig-A7.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.1,
+   0.828,
+   0.314
+  ],
+  "label": "fig:appendix_data_distribution",
+  "source_files": [
+   "figs/appendix-data-distribution.png"
+  ],
+  "tex_line": 443,
+  "refs": [
+   "§A.2 Training Data Overview (L441)"
+  ]
+ },
+ {
+  "kind": "figure",
+  "num": "A8",
+  "page": 18,
+  "caption": "Figure A8: Numerical reasoning from a compact evidence set. Red highlighting marks $18,595 under 2010 and $10,159 under 2009 in the source excerpt. The lower portion shows how these values are transformed into calculation-ready summaries and final answers.",
+  "file": "figures/fig-A8.png",
+  "mode": "整页",
+  "label": "fig:case_docfinqa_success",
+  "source_files": [],
+  "tex_line": 823,
+  "refs": []
+ },
+ {
+  "kind": "figure",
+  "num": "A9",
+  "page": 18,
+  "caption": "Figure A9: Multi-hop reasoning across distributed passages. The four source excerpts establish the Slush Puppie to hushpuppy to red horse fish to Moxostoma chain, which both model summaries preserve.",
+  "file": "figures/fig-A9.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.189,
+   0.828,
+   0.874
+  ],
+  "label": "fig:case_slush_puppie",
+  "source_files": [],
+  "tex_line": 966,
+  "refs": []
+ },
+ {
+  "kind": "figure",
+  "num": "A10",
+  "page": 19,
+  "caption": "Figure A10: Successful OOD cross-document synthesis over a 122,862-token context. The two source excerpts are drawn from different papers. H2S identifies the recurring threats and connects them to their umbrella category while preserving source provenance.",
+  "file": "figures/fig-A10.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.134,
+   0.828,
+   0.813
+  ],
+  "label": "fig:case_aalcr_success",
+  "source_files": [],
+  "tex_line": 1093,
+  "refs": []
+ },
+ {
+  "kind": "figure",
+  "num": "A11",
+  "page": 21,
+  "caption": "Figure A11: Ordinal retrieval and exact reproduction at about 64K tokens. The source excerpt contains the target essay, while the two trajectories identify its ordinal position and reproduce it with the requested prefix.",
+  "file": "figures/fig-A11.png",
+  "mode": "整页",
+  "label": "fig:case_mrcr_platforms",
+  "source_files": [],
+  "tex_line": 1245,
+  "refs": []
+ },
+ {
+  "kind": "figure",
+  "num": "A12",
+  "page": 21,
+  "caption": "Figure A12: Different failure locations on the same question. The upper source portion highlights the incorrect 2015 block in red for H2S-7B and the correct May 2014 table row in red for H2S-14B. The lower portion compares the two Evidence–Summary–Answer trajectories.",
+  "file": "figures/fig-A12.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.224,
+   0.828,
+   0.803
+  ],
+  "label": "fig:case_docfinqa_failure",
+  "source_files": [],
+  "tex_line": 1368,
+  "refs": []
+ },
+ {
+  "kind": "figure",
+  "num": "A13",
+  "page": 22,
+  "caption": "Figure A13: Attribution and temporal-linking failure. Both trajectories identify Jacqueline Gareau as the subsequent Boston winner, but their linked placement claims for the 1988 Grandma’s Marathon disagree.",
+  "file": "figures/fig-A13.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.1,
+   0.828,
+   0.659
+  ],
+  "label": "fig:case_gareau_failure",
+  "source_files": [],
+  "tex_line": 1481,
+  "refs": []
+ },
+ {
+  "kind": "figure",
+  "num": "A14",
+  "page": 23,
+  "caption": "Figure A14: Evidence selection and summary Edrift in an OOD example of H2S. H2S-7B iden- tifies the incorrect statement as (C), whereas the H2S-14B summary concentrates on dataset details and selects (D).",
+  "file": "figures/fig-A14.png",
+  "mode": "整页",
+  "label": "fig:case_longbenchv2_failure",
+  "source_files": [],
+  "tex_line": 1651,
+  "refs": []
+ },
+ {
+  "kind": "table",
+  "num": "1",
+  "page": 4,
+  "caption": "Table 1: Even a few summary to- kens can substantially improve long- document QA.",
+  "file": "figures/tab-01.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.54,
+   0.459,
+   0.828,
+   0.56
+  ],
+  "label": "tab:summary_motivation",
+  "source_files": [],
+  "tex_line": 90,
+  "refs": [
+   "§3.1 Why a Few Summary Tokens Help (L119)"
+  ]
+ },
+ {
+  "kind": "table",
+  "num": "2",
+  "page": 7,
+  "caption": "Table 2: Main results on seven long-context benchmarks. All models use a maximum input length of 128K and a maximum output length of 4K. Closed-source models are included for reference; among all open-source models, including our models, the best result in each column is shown in bold, and the second-best result is shown in bold and underlined.",
+  "file": "figures/tab-02.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.434,
+   0.828,
+   0.665
+  ],
+  "label": "tab:main_results",
+  "source_files": [],
+  "tex_line": 227,
+  "refs": [
+   "§4.2 Main Results (L269)",
+   "§A.3 Evidence--Summary Quality Subset and Det (L467)"
+  ]
+ },
+ {
+  "kind": "table",
+  "num": "3",
+  "page": 8,
+  "caption": "Table 3: Detailed ablation of evidence and summary generation. Baseline removes both evidence and summary generation; w/o evidence and w/o summary remove the corresponding intermediate component, respectively. Avg is the unweighted macro-average over the seven tasks.",
+  "file": "figures/tab-03.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.577,
+   0.828,
+   0.722
+  ],
+  "label": "tab:component_ablation_full",
+  "source_files": [],
+  "tex_line": 299,
+  "refs": [
+   "§4.4 Ablations study (L345)"
+  ]
+ },
+ {
+  "kind": "table",
+  "num": "4",
+  "page": 13,
+  "caption": "Table 4: Final-answer and evidence–summary quality. Final Answer is the seven-task Avg from Table 2. E-Recall is the macro-average of per-example recall over reference evidence blocks; predic- tions are the 8-character block IDs parsed from <evidence>. Construction-time IDs are aligned to equivalent IDs in the actual inference blockization by normalized character matching before ID-only scoring. S-RL is ROUGE-L between the parsed <summary> and the reference summary. ESQ is the macro-average of the per-example harmonic mean of E-Recall and S-RL. Missing or unparsable components receive zero.",
+  "file": "figures/tab-04.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.505,
+   0.828,
+   0.806
+  ],
+  "label": "tab:esq_qc1090",
+  "source_files": [],
+  "tex_line": 462,
+  "refs": []
+ },
+ {
+  "kind": "table",
+  "num": "5",
+  "page": 14,
+  "caption": "Table 5: Detailed performance under different output budgets. Avg denotes the unweighted macro-average across the seven tasks, and Complete denotes the percentage of completed genera- tions.",
+  "file": "figures/tab-05.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.15,
+   0.828,
+   0.395
+  ],
+  "label": "tab:output_budget_full",
+  "source_files": [],
+  "tex_line": 506,
+  "refs": [
+   "§A.4 Detailed Output-Budget Results (L504)"
+  ]
+ },
+ {
+  "kind": "table",
+  "num": "6",
+  "page": 16,
+  "caption": "Table 6: Full results for question-conditioned summaries on long-document QA. Accuracy is reported by document-length range and as their unweighted average; context tokens report the mean document and summary lengths, and ∆Avg is measured against LongDoc for the same answer model.",
+  "file": "figures/tab-06.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.172,
+   0.164,
+   0.828,
+   0.319
+  ],
+  "label": "tab:summary_motivation_full",
+  "source_files": [],
+  "tex_line": 637,
+  "refs": [
+   "§A.8 Question-Conditioned Summary Motivation (L635)"
+  ]
+ },
+ {
+  "kind": "table",
+  "num": "7",
+  "page": 17,
+  "caption": "Table 7: Construction statistics for the SFT and RL data. A case is an independent question– context instance; a block is the unit used for document segmentation and retrieval; a subquery is a decomposed information need; a claim is an independently verifiable atomic fact; and a citation links a claim to its source text. Quality-control counts follow their evaluated objects: faithfulness counts citations that exactly match the source, coverage counts subqueries supported by cited evidence, and answerability counts cases that can be solved from the summary alone. An additional 7,436 citations pass normalized fuzzy-0.95 matching and are reported in the appendix.",
+  "file": "figures/tab-07.png",
+  "mode": "裁剪",
+  "bbox": [
+   0.253,
+   0.208,
+   0.747,
+   0.575
+  ],
+  "label": "tab:data_construction",
+  "source_files": [],
+  "tex_line": 663,
+  "refs": []
+ }
+]

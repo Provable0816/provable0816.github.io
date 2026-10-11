@@ -75,5 +75,12 @@
     "date": "2026-10-07",
     "tags": ["xxx-from-scratch", "AI"],
     "description": "从零开始实现一个简单的AI系统。"
+  },
+  {
+    "slug": "highlight-then-summarize-learning-compress-evidence精读笔记",
+    "title": "highlight-then-summarize-learning-compress-evidence精读笔记",
+    "date": "2026-10-12",
+    "tags": ["LLM Memory"],
+    "description": "highlight-then-summarize-learning-compress-evidence精读笔记"
   }
 ]
