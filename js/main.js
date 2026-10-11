@@ -315,6 +315,32 @@ function rewriteDocLinks(container) {
   });
 }
 
+/* ------------------------------ 文章图片 ------------------------------
+   正文里的图片按 Markdown 习惯写相对路径（如 htslce_figures/fig-01.png），
+   本意是相对文章文件所在目录。但本站跑在 hash 路由上，页面基址永远是站点根，
+   直接交给浏览器会把 posts/ 这一段丢掉而 404。这里在渲染后统一补上文章
+   所在目录；`..` 逐段回退、退到 posts/ 之上就按站点根解析，与写文档时的
+   直觉一致。绝对路径、URL、data: 等原样保留。
+   ---------------------------------------------------------------------- */
+
+/** 把正文里相对路径的图片 src 改写成「文章目录 + 原路径」 */
+function rewriteImgSrcs(container, dir) {
+  const base = String(dir || '').split('/').filter(Boolean);
+  if (!base.length) return;
+  container.querySelectorAll('img[src]').forEach((img) => {
+    const h = String(img.getAttribute('src') || '').trim();
+    if (!h || h.startsWith('#') || h.startsWith('/') || /^[a-z][a-z0-9+.-]*:/i.test(h)) return;
+    const segs = base.slice(); // 每张图独立从文章目录起算
+    for (const seg of h.split('/')) {
+      if (!seg || seg === '.') continue;
+      if (seg === '..') { segs.pop(); continue; }
+      segs.push(seg);
+    }
+    if (!segs.length) return;
+    img.setAttribute('src', segs.map((s) => encodeURIComponent(dec(s))).join('/'));
+  });
+}
+
 /** 宽松归一：只留字母/数字/汉字，忽略空格、全角空格、标点、连字符 */
 function looseKey(text) {
   return String(text).trim().toLowerCase().replace(/[^\w\u3400-\u4dbf\u4e00-\u9fff]/g, '');
@@ -821,6 +847,7 @@ async function viewPost(slug, backHash = '') {
       <a href="${escapeHtml(doc.url)}" target="_blank" rel="noopener">在新窗口打开原始文件 ↗</a></p>`;
     mountHtmlDoc(prose, doc);
   } else {
+    rewriteImgSrcs(prose, POST_DIR + slug.split('/').slice(0, -1).join('/'));
     enhanceContent(prose);
     mountToc(prose, document.getElementById('post-toc'));
   }
