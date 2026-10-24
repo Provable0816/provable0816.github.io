@@ -82,5 +82,12 @@
     "date": "2026-10-12",
     "tags": ["LLM Memory"],
     "description": "highlight-then-summarize-learning-compress-evidence精读笔记"
+  },
+  {
+    "slug": "PPO与后PPO算法公式全景手册",
+    "title": "PPO与后PPO算法公式全景手册",
+    "date": "2026-10-24",
+    "tags": ["reinforcement learning", "PPO", "后PPO"],
+    "description": "PPO与后PPO算法公式全景手册"
   }
 ]
