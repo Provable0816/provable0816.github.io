@@ -96,5 +96,12 @@
     "date": "2026-10-29",
     "tags": ["采样方法"],
     "description": "机器学习中的采样方法与可微分布构造调研"
+  },
+  {
+    "slug": "扩散语言模型DLLM深度研究报告",
+    "title": "扩散语言模型（dLLM/DLLM）深度研究报告",
+    "date": "2026-10-29",
+    "tags": ["DLLM"],
+    "description": "扩散语言模型（dLLM/DLLM）深度研究报告"
   }
 ]
