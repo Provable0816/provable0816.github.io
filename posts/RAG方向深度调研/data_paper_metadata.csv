@@ -1,0 +1,16 @@
+paper_id|title|first_author|institution|year|status|venue|arxiv_id|source
+P001|Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks|Lewis|UCL/Facebook AI|2020|正式发表|NeurIPS|2005.11401|https://arxiv.org/abs/2005.11401
+P002|REALM: Retrieval-Augmented Language Model Pre-Training|Guu|Google|2020|正式发表|ICLR|2002.08909|https://arxiv.org/abs/2002.08909
+P003|Dense Passage Retrieval for Open-Domain Question Answering|Karpukhin|Facebook AI|2020|正式发表|EMNLP|2004.04906|https://aclanthology.org/2020.emnlp-main.550
+P004|Retrieval-Augmented Generation for Large Language Models: A Survey|Gao|HKUDS|2023|arXiv预印本|arXiv|2312.10997|https://arxiv.org/abs/2312.10997
+P005|Precise Zero-Shot Dense Retrieval without Relevance Labels through Hypothetical Document Embeddings|Gao|Google Research|2022|正式发表|EMNLP|2212.10496|https://arxiv.org/abs/2212.10496
+P006|Query Rewriting for Retrieval-Augmented Large Language Models|Ma|Microsoft|2023|正式发表|EMNLP Findings|2305.14283|https://arxiv.org/abs/2305.14283
+P007|RECOMP: Improving Retrieval-Augmented LMs with Compression and Selective Augmentation|Xu|Allen Institute for AI|2023|正式发表|EMNLP|2310.04408|https://arxiv.org/abs/2310.04408
+P008|LongLLMLingua: Accelerating and Enhancing LLMs in Long Context Scenarios via Prompt Compression|Jiang|Tsinghua|2023|正式发表|ACL|2310.06839|https://arxiv.org/abs/2310.06839
+P009|Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection|Asai|UW/AI2|2024|正式发表|ICLR|2310.11511|https://arxiv.org/abs/2310.11511
+P010|Corrective Retrieval Augmented Generation|Yan|University of Waterloo|2024|正式发表|ICLR|2401.15884|https://arxiv.org/abs/2401.15884
+P011|Adaptive-RAG: Learning to Adapt Retrieval-Augmented LLMs through Question Complexity|Jeong|UCLA|2024|正式发表|ICLR|2403.14403|https://arxiv.org/abs/2403.14403
+P012|GraphRAG: From Local to Global|Edge|Microsoft Research|2024|arXiv预印本|arXiv|2404.16130|https://arxiv.org/abs/2404.16130
+P013|LightRAG: Simple and Fast Retrieval-Augmented Generation|Guo|HKUDS/BUPT|2024|arXiv预印本|arXiv|2410.05779|https://arxiv.org/abs/2410.05779
+P014|MMed-RAG: Versatile Multimodal RAG System for Medical Vision Language Models|Li|Harbin Institute of Technology|2024|arXiv预印本|arXiv|2410.13085|https://arxiv.org/abs/2410.13085
+P015|FailSafe-RAG: Evidence-State-Aware Generation under Retrieval Failures|作者未核实|机构未核实|2026|会议录用|CIKM|ID未核实|https://stcn.com/article/detail/4229835.html
