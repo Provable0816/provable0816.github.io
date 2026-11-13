@@ -103,5 +103,12 @@
     "date": "2026-10-29",
     "tags": ["DLLM"],
     "description": "扩散语言模型（dLLM/DLLM）深度研究报告"
+  },
+  {
+    "slug": "RAG方向深度调研",
+    "title": "RAG 方向深度调研",
+    "date": "2026-11-13",
+    "tags": ["RAG"],
+    "description": "RAG 方向深度调研"
   }
 ]
