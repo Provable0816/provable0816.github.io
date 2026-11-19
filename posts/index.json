@@ -117,5 +117,12 @@
     "date": "2026-11-19",
     "tags": ["LLM", "记忆", "上下文压缩"],
     "description": "面向智能体与API交互的上下文压缩"
+  },
+  {
+    "slug": "aircraft-ata-knowledge-base",
+    "title": "航空ATA知识库",
+    "date": "2026-11-20",
+    "tags": ["航空", "ATA", "知识库"],
+    "description": "航空ATA知识库"
   }
 ]
